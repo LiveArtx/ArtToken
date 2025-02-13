@@ -20,6 +20,10 @@ The ArtToken repository contains the implementation of an ERC20 token with addit
 - **Decimals**: 18
 - **Max Supply**: 1,000,000,000 ART
 
+## Prerequisites
+
+- **Node.js**: Ensure you have Node.js version 20 or higher installed. This is required for managing dependencies and running scripts.
+
 ## Security Considerations
 
 - **Access Control**: The contract uses OpenZeppelin's `Ownable` for access control, ensuring only the owner can perform sensitive operations like minting and setting the staking contract address.
