@@ -1,1 +1,9 @@
+# Compiler files
+cache/
+out/
+
+# IDE files
 .vscode
+
+# Environment variables
+.env
