@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.28;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, ERC20PermitUpgradeable, UUPSUpgradeable {
+contract ArtToken is Initializable, ERC20CappedUpgradeable, Ownable2StepUpgradeable, ERC20PermitUpgradeable, UUPSUpgradeable {
     uint8 public constant DECIMALS = 18;
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** DECIMALS;
     uint256 private _claimableSupply;
@@ -20,6 +20,7 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, 
 
     event TokensClaimed(address indexed user, uint256 amount);
     event TokensClaimedAndStaked(address indexed user, uint256 amount);
+    event SetClaimableSupply(uint256 amount);
     
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -44,6 +45,7 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, 
         return DECIMALS;
     }
 
+    
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
@@ -68,6 +70,7 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, 
     function setClaimableSupply(uint256 amount) public onlyOwner {
         require(totalSupply() + amount <= cap(), "Claimable supply exceeds cap");
         _claimableSupply = amount;
+        emit SetClaimableSupply(amount);
     }
 
     /// @notice Sets the merkle root - only callable by owner
@@ -104,13 +107,19 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, 
     }
 
 
+    /// @notice Allows the staking contract to claim tokens for a user
+    /// @param amount The total amount of tokens allocated
+    /// @param amountToClaim The amount of tokens to claim in this transaction
+    /// @param merkleProof An array of bytes32 hashes as proof
+    /// @param receiver The address to claim tokens for
     function claimFor(uint256 amount, uint256 amountToClaim, bytes32[] calldata merkleProof, address receiver) external {
+        address _stakingContractAddress = stakingContractAddress;
         require(
-            stakingContractAddress != address(0),
+            _stakingContractAddress != address(0),
             "Staking contract not set"
         );
         require(
-            msg.sender == stakingContractAddress,
+            msg.sender == _stakingContractAddress,
             "Invalid staking contract address"
         );
         
@@ -132,7 +141,7 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, 
         _claimedAmount[receiver] += amountToClaim;
         _claimableSupply -= amountToClaim;
         // Mint tokens to the staking contract
-        _mint(stakingContractAddress, amountToClaim);
+        _mint(_stakingContractAddress, amountToClaim);
         emit TokensClaimedAndStaked(receiver, amountToClaim);
     }
 
@@ -143,25 +152,35 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, OwnableUpgradeable, 
         return _claimedAmount[account];
     }
 
+    /// @notice Returns the cap of the token
     function cap() public view virtual override returns (uint256) {
         return MAX_SUPPLY - _totalBurned;
     }
 
+    /// @notice Burns tokens from the caller's account
+    /// @param amount The amount of tokens to burn
     function burn(uint256 amount) public virtual {
         _burn(_msgSender(), amount);
         _totalBurned += amount;
     }
 
+    /// @notice Burns tokens from an account
+    /// @param account The address to burn tokens from
+    /// @param amount The amount of tokens to burn
     function burnFrom(address account, uint256 amount) public virtual {
         _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
         _totalBurned += amount;
     }
 
+    /// @notice Returns the total amount of tokens burned
+    /// @return uint256 Total amount of tokens burned
     function totalBurned() public view returns (uint256) {
         return _totalBurned;
     }
 
+    /// @notice Sets the staking contract address
+    /// @param _stakingContractAddress The address of the staking contract
     function setStakingContractAddress(address _stakingContractAddress) external onlyOwner {
         require(_stakingContractAddress != address(0), "Invalid staking contract address");
         stakingContractAddress = _stakingContractAddress;
