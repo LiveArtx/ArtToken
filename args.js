@@ -1,0 +1,6 @@
+module.exports = [
+    'MyOFT',
+    'MOFT',
+    '0x6EDCE65403992e310A62460808c4b910D972f10f',
+    '0x495D4E2b3C7028Aa592cD2f6781b008dA60c1a07',
+];
