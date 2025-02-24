@@ -1,28 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import { OFT } from "@layerzerolabs/oft-evm/contracts/OFT.sol";
+import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
 
-contract ArtToken is OFT {
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _lzEndpoint,
-        address _delegate
-    ) OFT(_name, _symbol, _lzEndpoint, _delegate) Ownable(_delegate) {
-        uint256 initialBalance = 500_000_000 * 10**18;
-        _mint(_delegate, initialBalance );
-    }
-}
-
-contract ArtToken is Initializable, ERC20CappedUpgradeable, Ownable2StepUpgradeable, ERC20PermitUpgradeable, UUPSUpgradeable {
+contract ArtToken is
+    ERC20CappedUpgradeable,
+    ERC20PermitUpgradeable,
+    UUPSUpgradeable,
+    OFTUpgradeable
+{
     uint8 public constant DECIMALS = 18;
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** DECIMALS;
     uint256 private _claimableSupply;
@@ -34,25 +24,21 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, Ownable2StepUpgradea
     event TokensClaimed(address indexed user, uint256 amount);
     event TokensClaimedAndStaked(address indexed user, uint256 amount);
     event SetClaimableSupply(uint256 amount);
-    
+
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
+    constructor(address _lzEndpoint) OFTUpgradeable(_lzEndpoint) {
         _disableInitializers();
     }
 
-    function initialize(
-        address initialOwner,
-        string memory tokenName,
-        string memory tokenSymbol,
-        uint256 initialMintAmount,
-         address _lzEndpoint,
-        address _delegate
-    ) initializer public {
-        __ERC20_init(tokenName, tokenSymbol);
+    function initialize(string memory _name, string memory _symbol, address _delegate, uint256 initialMintAmount)
+        public
+        initializer
+    {
+        __OFT_init(_name, _symbol, _delegate);
+        __Ownable_init(_delegate);
+        __ERC20_init(_name, _symbol);
         __ERC20Capped_init(MAX_SUPPLY);
-        __Ownable_init(initialOwner);
-        __ERC20Permit_init(tokenName);
-        __UUPSUpgradeable_init();
+        __ERC20Permit_init(_name);
         _mint(msg.sender, initialMintAmount * 10 ** decimals());
     }
 
@@ -60,20 +46,19 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, Ownable2StepUpgradea
         return DECIMALS;
     }
 
-    
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
-    function _update(address from, address to, uint256 value) internal virtual override(ERC20CappedUpgradeable, ERC20Upgradeable) {
+    function _update(address from, address to, uint256 value)
+        internal
+        virtual
+        override(ERC20CappedUpgradeable, ERC20Upgradeable)
+    {
         super._update(from, to, value);
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        onlyOwner
-        override
-    {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /// @notice Returns the current claimable supply
     function getClaimableSupply() public view returns (uint256) {
@@ -101,58 +86,47 @@ contract ArtToken is Initializable, ERC20CappedUpgradeable, Ownable2StepUpgradea
     function claim(uint256 amount, uint256 amountToClaim, bytes32[] calldata merkleProof) public {
         require(amountToClaim > 0, "Cannot claim 0 tokens");
         require(amountToClaim <= amount, "Cannot claim more than allocated");
-        
+
         uint256 alreadyClaimed = _claimedAmount[msg.sender];
         require(alreadyClaimed < amount, "Already claimed full allocation");
         require(alreadyClaimed + amountToClaim <= amount, "Claim amount exceeds allocation");
         require(amountToClaim <= _claimableSupply, "Insufficient claimable supply");
-        
+
         // Create leaf node with total allocation amount
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, amount));
-        
+
         // Verify merkle proof
-        require(
-            MerkleProof.verify(merkleProof, _merkleRoot, leaf),
-            "Invalid merkle proof"
-        );
+        require(MerkleProof.verify(merkleProof, _merkleRoot, leaf), "Invalid merkle proof");
         _claimedAmount[msg.sender] += amountToClaim;
         _claimableSupply -= amountToClaim;
         _mint(msg.sender, amountToClaim);
         emit TokensClaimed(msg.sender, amountToClaim);
     }
 
-
     /// @notice Allows the staking contract to claim tokens for a user
     /// @param amount The total amount of tokens allocated
     /// @param amountToClaim The amount of tokens to claim in this transaction
     /// @param merkleProof An array of bytes32 hashes as proof
     /// @param receiver The address to claim tokens for
-    function claimFor(uint256 amount, uint256 amountToClaim, bytes32[] calldata merkleProof, address receiver) external {
+    function claimFor(uint256 amount, uint256 amountToClaim, bytes32[] calldata merkleProof, address receiver)
+        external
+    {
         address _stakingContractAddress = stakingContractAddress;
-        require(
-            _stakingContractAddress != address(0),
-            "Staking contract not set"
-        );
-        require(
-            msg.sender == _stakingContractAddress,
-            "Invalid staking contract address"
-        );
-        
+        require(_stakingContractAddress != address(0), "Staking contract not set");
+        require(msg.sender == _stakingContractAddress, "Invalid staking contract address");
+
         // Create leaf node with total allocation amount using the receiver's address
         bytes32 leaf = keccak256(abi.encodePacked(receiver, amount));
-        
+
         // Verify merkle proof
-        require(
-            MerkleProof.verify(merkleProof, _merkleRoot, leaf),
-            "Invalid merkle proof"
-        );
-        
+        require(MerkleProof.verify(merkleProof, _merkleRoot, leaf), "Invalid merkle proof");
+
         // Track claims against the user's address but send tokens to the staking contract
         uint256 alreadyClaimed = _claimedAmount[receiver];
         require(alreadyClaimed < amount, "Already claimed full allocation");
         require(alreadyClaimed + amountToClaim <= amount, "Claim amount exceeds allocation");
         require(amountToClaim <= _claimableSupply, "Insufficient claimable supply");
-        
+
         _claimedAmount[receiver] += amountToClaim;
         _claimableSupply -= amountToClaim;
         // Mint tokens to the staking contract

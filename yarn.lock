@@ -769,12 +769,24 @@
   resolved "https://registry.npmjs.org/@layerzerolabs/metadata-tools/-/metadata-tools-0.3.2.tgz#eaec09b3164556e3f91d6db297cadcae2edf5de7"
   integrity sha512-lSBHpCTSNuEnSQS/+7uGGyBDNPJH8I2p7Ms0iEl0+Z73OdpVlv4TGKoHbszrJY6q4uEgXH6ez48lpoJdxTiTSw==
 
+"@layerzerolabs/oapp-evm-upgradeable@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.npmjs.org/@layerzerolabs/oapp-evm-upgradeable/-/oapp-evm-upgradeable-0.1.1.tgz#c4b9021115938000d2343c69718f136ee5bdd032"
+  integrity sha512-9rTJz4+QvL8/okR6EI05+M4Qz+G8c1Tozbu6P1CgBf9ZsSC2rGy5x2DGLjvzma44N1pPeL95lFK8MKu8TMpD6g==
+  dependencies:
+    ethers "^5.7.2"
+
 "@layerzerolabs/oapp-evm@^0.3.0":
   version "0.3.1"
   resolved "https://registry.npmjs.org/@layerzerolabs/oapp-evm/-/oapp-evm-0.3.1.tgz#79ebeba4f9a9b1b72e0674775ce4e9e027303d1b"
   integrity sha512-SOuvqy1s+tWwgixR+hw5d9izS8z2tiO8XwGddlnSte24e9lxnOrqwMaOdIJt0GorTJk5rdUgrMlBW0HVwYMZDw==
   dependencies:
     ethers "^5.7.2"
+
+"@layerzerolabs/oft-evm-upgradeable@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/@layerzerolabs/oft-evm-upgradeable/-/oft-evm-upgradeable-3.0.1.tgz#8aa033e4c72f9d4167ae6a48ef971de392f3ab12"
+  integrity sha512-FIWIB0Pda5zNTRf/3L3Da7IqU1sQkvO4EumD/mV2E4o5iTe8QQOW9vFuxmQMJDs4hTdh8K8OTVY2OOolGAvDig==
 
 "@layerzerolabs/oft-evm@^3.1.0":
   version "3.1.2"
