@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
-import "../src/ArtToken.sol";
+import "../../src/upgradable/ArtToken.sol";
 import "forge-std/console.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {Options} from "openzeppelin-foundry-upgrades/Options.sol";
@@ -36,7 +36,7 @@ contract ArtTokenTest is Test {
         
         // Deploy the proxy using the contract name
         proxy = Upgrades.deployUUPSProxy(
-            "ArtToken.sol:ArtToken",
+            "upgradable/ArtToken.sol:ArtToken",
             abi.encodeCall(
                 ArtToken.initialize,
                 (owner, "ART TOKEN", "ART", 1_000_000)
@@ -102,7 +102,7 @@ contract ArtTokenTest is Test {
         // Use the tryCaller parameter to specify the owner address
         Upgrades.upgradeProxy(
             proxy,
-            "ArtToken.sol:ArtToken",
+            "upgradable/ArtToken.sol:ArtToken",
             "",  // Empty bytes since we don't need to call any function during upgrade
             opts,
             owner  // Pass the owner address as the tryCaller
