@@ -80,6 +80,17 @@ contract ArtTokenTest is Test {
         artToken.setClaimableSupply(CLAIM_AMOUNT * 3); // Total supply for both claimers
     }
 
+    function testInitialState() public {
+        assertEq(artToken.totalSupply(), 0);
+        assertEq(artToken.cap(), 1_000_000 * 10**artToken.decimals());
+        assertEq(artToken.getClaimableSupply(), CLAIM_AMOUNT * 3);
+    }
+
+    function testInitializeRevertIfAlreadyInitialized() public {
+        vm.expectRevert("Initializable: contract is already initialized");
+        artToken.initialize(address(0), "ART TOKEN", "ART", 1_000_000);
+    }
+
     // Test the basic ERC20 functionality of the MyToken contract
     function testERC20Functionality() public {
         // Impersonate the owner to call mint function
