@@ -2,17 +2,20 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
-import "../src/ArtToken.sol";
+import {ArtToken} from "../src/ArtTokenOFT.sol";
 import "forge-std/console.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 import {Options} from "openzeppelin-foundry-upgrades/Options.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ERC20CappedUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+// import { EndpointV2Mock } from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/EndpointV2Mock.sol";
+import { OFTTest } from "@layerzerolabs/oft-evm-upgradeable/test/OFT.t.sol";
 
-contract ArtTokenTest is Test {
+contract ArtTokenTest is Test, OFTTest {
     ArtToken artToken;
     address proxy;
     address owner;
@@ -27,24 +30,42 @@ contract ArtTokenTest is Test {
     address public claimer1;
     address public claimer2;
 
+    // LayerZero endpoint address
+    address public lzEndpoint;
+
+    // Initializer data
+    string name;
+    string symbol;
+    address delegate;
+    uint256 initialMintAmount;
+
     // Set up the test environment before running tests
-    function setUp() public {
+    function setUp() public override {
         // Define the owner address
         owner = vm.addr(1);
         claimer1 = vm.addr(2);
         claimer2 = vm.addr(3);
-        
+        lzEndpoint = vm.addr(4);
+
+        name = "ART TOKEN";
+        symbol = "ART";
+        delegate = owner;
+        initialMintAmount = 1_000_000;
+
+        console.log("Starting test");
+
         // Deploy the proxy using the contract name
-        proxy = Upgrades.deployUUPSProxy(
-            "ArtTokenOFT.sol:ArtToken",
-            abi.encodeCall(
-                ArtToken.initialize,
-                (owner, "ART TOKEN", "ART", 1_000_000)
-            )
+        proxy = _deployContractAndProxy(
+            type(ArtToken).creationCode,
+            abi.encode(address(endpoints[aEid])),
+            abi.encodeWithSelector(ArtToken.initialize.selector, name, symbol, delegate, initialMintAmount)
         );
-        
+        console.log("Deployed proxy");
+
         // Attach the ArtToken interface to the deployed proxy
         artToken = ArtToken(proxy);
+        console.log("Attached ArtToken interface");
+
         // Define a new owner address for upgrade tests
         newOwner = address(1);
         // Emit the owner address for debugging purposes
@@ -88,7 +109,7 @@ contract ArtTokenTest is Test {
 
     function testInitializeRevertIfAlreadyInitialized() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        artToken.initialize(address(0), "ART TOKEN", "ART", 1_000_000);
+        artToken.initialize(name, symbol, delegate, initialMintAmount);
     }
 
     // Test the basic ERC20 functionality of the MyToken contract
@@ -108,6 +129,7 @@ contract ArtTokenTest is Test {
         // Create options and skip storage check since we're testing with the same contract
         Options memory opts;
         opts.unsafeSkipStorageCheck = true;
+        opts.constructorData = abi.encode(lzEndpoint);
         
         // Upgrade the proxy to the new implementation
         // Use the tryCaller parameter to specify the owner address

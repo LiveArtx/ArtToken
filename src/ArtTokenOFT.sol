@@ -3,14 +3,16 @@ pragma solidity 0.8.28;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+// import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
+import "forge-std/console.sol";
+
 
 contract ArtToken is
     ERC20CappedUpgradeable,
     ERC20PermitUpgradeable,
-    UUPSUpgradeable,
+    // UUPSUpgradeable,
     OFTUpgradeable
 {
     uint8 public constant DECIMALS = 18;
@@ -34,9 +36,14 @@ contract ArtToken is
         public
         initializer
     {
+        console.log("initializing");
+        console.log("name: %s", _name);
+        console.log("symbol: %s", _symbol);
+        console.log("delegate: %s", _delegate);
+        console.log("initialMintAmount: %d", initialMintAmount);
         __OFT_init(_name, _symbol, _delegate);
         __Ownable_init(_delegate);
-        __ERC20_init(_name, _symbol);
+        // __ERC20_init(_name, _symbol);
         __ERC20Capped_init(MAX_SUPPLY);
         __ERC20Permit_init(_name);
         _mint(msg.sender, initialMintAmount * 10 ** decimals());
@@ -58,7 +65,7 @@ contract ArtToken is
         super._update(from, to, value);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    // function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /// @notice Returns the current claimable supply
     function getClaimableSupply() public view returns (uint256) {

@@ -3,7 +3,12 @@
   "version": "0.5.6",
   "private": true,
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "precompile": "node scripts/inject-annotation.ts",
+    "compile": "forge compile",
+    "pretest": "node scripts/inject-annotation.ts",
+    "test": "forge test"
+  },
   "resolutions": {
     "ethers": "^5.7.2",
     "hardhat-deploy": "^0.12.1",
