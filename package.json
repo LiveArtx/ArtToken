@@ -4,9 +4,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "precompile": "node scripts/inject-annotation.ts",
+    "precompile": "node scripts/check-and-run.js",
     "compile": "forge compile",
-    "pretest": "node scripts/inject-annotation.ts",
+    "pretest": "node scripts/check-and-run.js",
     "test": "forge test"
   },
   "resolutions": {

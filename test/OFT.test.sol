@@ -9,6 +9,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 
 contract MyOFTUpgradeableTest is OFTTest {
     bytes32 internal constant IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+    uint256 public INITIAL_MINT_AMOUNT = 1_000_000;
 
     function test_oft_implementation_initialization_disabled() public {
         MyOFTUpgradeable oftUpgradeable = MyOFTUpgradeable(
@@ -19,7 +20,8 @@ contract MyOFTUpgradeableTest is OFTTest {
                     MyOFTUpgradeable.initialize.selector,
                     "oftUpgradeable",
                     "oftUpgradeable",
-                    address(this)
+                    address(this),
+                    INITIAL_MINT_AMOUNT
                 )
             )
         );
@@ -30,7 +32,7 @@ contract MyOFTUpgradeableTest is OFTTest {
         MyOFTUpgradeable oftUpgradeableImplementation = MyOFTUpgradeable(implementationAddress);
 
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        oftUpgradeableImplementation.initialize("oftUpgradeable", "oftUpgradeable", address(this));
+        oftUpgradeableImplementation.initialize("oftUpgradeable", "oftUpgradeable", address(this), INITIAL_MINT_AMOUNT);
 
         EndpointV2Mock endpoint = EndpointV2Mock(address(oftUpgradeable.endpoint()));
         assertEq(endpoint.delegates(address(oftUpgradeable)), address(this));
