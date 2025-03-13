@@ -56,6 +56,7 @@ const config  = {
             },
         ],
     },
+    defaultNetwork: 'hardhat',
     networks: {
         'base-testnet': {
             eid: EndpointId.BASESEP_V2_TESTNET,
@@ -85,20 +86,10 @@ const config  = {
     },
     etherscan: {
         apiKey: {
-            'amoy-testnet': 'GPYVFG3UHSPIFS1DS8M8EIP86W4X3VGCJY',
             'base-testnet': '29FK5DH6V49CWS99WXGSQHXE92XHH8P4CI',
             'linea-testnet': '714ZUZNV38FX4FD63PND6MQUX214GW7SGV',
         },
         customChains: [
-            {
-                network: 'amoy-testnet',
-                chainId: 80002,
-                urls: {
-                    apiURL: 'https://api-amoy.polygonscan.com/api',
-                    browserURL: 'https://amoy.polygonscan.com/',
-                },
-            },
-
             {
                 network: 'base-testnet',
                 chainId: 84532,

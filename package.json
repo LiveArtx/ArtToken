@@ -5,15 +5,13 @@
   "license": "MIT",
   "scripts": {
     "precompile": "node scripts/check-and-run.js",
-    "compile": "forge compile",
+    "compile": "forge compile --via-ir",
     "pretest": "node scripts/check-and-run.js",
-    "test": "forge test"
+    "test": "forge test --via-ir"
   },
   "resolutions": {
     "ethers": "^5.7.2",
-    "hardhat-deploy": "^0.12.1",
-    "@openzeppelin/contracts": "^5.0.2",
-    "@openzeppelin/contracts-upgradeable": "^5.0.2"
+    "hardhat-deploy": "^0.12.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -46,6 +44,7 @@
     "eslint": "^8.55.0",
     "eslint-plugin-jest-extended": "~2.0.0",
     "ethers": "^5.7.2",
+    "fp-ts": "^2.16.9",
     "hardhat": "^2.22.10",
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-deploy": "^0.12.1",
@@ -71,6 +70,7 @@
   },
   "dependencies": {
     "@layerzerolabs/devtools": "^0.4.5",
+    "@layerzerolabs/devtools-evm": "~1.0.6",
     "@layerzerolabs/oapp-evm-upgradeable": "^0.1.1",
     "@layerzerolabs/oft-evm-upgradeable": "^3.0.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.8"

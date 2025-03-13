@@ -1,20 +1,13 @@
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.22;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-// import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
-import "forge-std/console.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-
-contract ArtToken is
-    ERC20CappedUpgradeable,
-    ERC20PermitUpgradeable,
-    // UUPSUpgradeable,
-    OFTUpgradeable
-{
+contract ArtTokenOFT is OFTUpgradeable, ERC20CappedUpgradeable, Ownable2StepUpgradeable, ERC20PermitUpgradeable {
     uint8 public constant DECIMALS = 18;
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** DECIMALS;
     uint256 private _claimableSupply;
@@ -27,7 +20,6 @@ contract ArtToken is
     event TokensClaimedAndStaked(address indexed user, uint256 amount);
     event SetClaimableSupply(uint256 amount);
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(address _lzEndpoint) OFTUpgradeable(_lzEndpoint) {
         _disableInitializers();
     }
@@ -36,14 +28,10 @@ contract ArtToken is
         public
         initializer
     {
-        console.log("initializing");
-        console.log("name: %s", _name);
-        console.log("symbol: %s", _symbol);
-        console.log("delegate: %s", _delegate);
-        console.log("initialMintAmount: %d", initialMintAmount);
         __OFT_init(_name, _symbol, _delegate);
         __Ownable_init(_delegate);
-        // __ERC20_init(_name, _symbol);
+
+        // art token initialization
         __ERC20Capped_init(MAX_SUPPLY);
         __ERC20Permit_init(_name);
         _mint(msg.sender, initialMintAmount * 10 ** decimals());
@@ -64,8 +52,6 @@ contract ArtToken is
     {
         super._update(from, to, value);
     }
-
-    // function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /// @notice Returns the current claimable supply
     function getClaimableSupply() public view returns (uint256) {
@@ -180,5 +166,23 @@ contract ArtToken is
     function setStakingContractAddress(address _stakingContractAddress) external onlyOwner {
         require(_stakingContractAddress != address(0), "Invalid staking contract address");
         stakingContractAddress = _stakingContractAddress;
+    }
+
+    // Override the conflicting functions
+    function transferOwnership(address newOwner)
+        public
+        virtual
+        override(OwnableUpgradeable, Ownable2StepUpgradeable)
+        onlyOwner
+    {
+        Ownable2StepUpgradeable.transferOwnership(newOwner);
+    }
+
+    function _transferOwnership(address newOwner)
+        internal
+        virtual
+        override(OwnableUpgradeable, Ownable2StepUpgradeable)
+    {
+        Ownable2StepUpgradeable._transferOwnership(newOwner);
     }
 }

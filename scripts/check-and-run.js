@@ -1,5 +1,20 @@
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
+
+const nodeModulesPath = './node_modules';
+
+// Check if node_modules directory exists
+if (!fs.existsSync(nodeModulesPath)) {
+    console.log('node_modules does not exist. Running: yarn install');
+    try {
+        execSync('yarn install', { stdio: 'inherit' });
+    } catch (error) {
+        console.error('Error installing dependencies:', error);
+        process.exit(1);
+    }
+} else {
+    console.log('node_modules already exists. Skipping yarn install.');
+}
 
 // Check if node_modules directory exists
 if (fs.existsSync('node_modules')) {

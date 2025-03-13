@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.22;
 
 import {OFTTest} from "@layerzerolabs/oft-evm-upgradeable/test/OFT.t.sol";
-import {MyOFTAdapterUpgradeable} from "../src/MyOFTAdapterUpgradeable.sol";
+import {MyOFTAdapterUpgradeable} from "../contracts/MyOFTAdapterUpgradeable.sol";
 import {EndpointV2Mock} from "@layerzerolabs/test-devtools-evm-foundry/contracts/mocks/EndpointV2Mock.sol";
-import {MyOFTUpgradeable} from "../src/MyOFTUpgradeable.sol";
+import {ArtTokenOFT} from "../contracts/ArtTokenUpgradeableOFT.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC20CappedUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 
-contract MyOFTUpgradeableTest is OFTTest {
+contract ArtTokenTest is OFTTest {
     bytes32 internal constant IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
-    MyOFTUpgradeable oftUpgradeable;
+    ArtTokenOFT oftUpgradeable;
 
     address proxy;
     address owner;
@@ -37,12 +37,12 @@ contract MyOFTUpgradeableTest is OFTTest {
 
         INITIAL_MINT_AMOUNT = 1_000_000;
 
-        oftUpgradeable = MyOFTUpgradeable(
+        oftUpgradeable = ArtTokenOFT(
             _deployContractAndProxy(
-                type(MyOFTUpgradeable).creationCode,
+                type(ArtTokenOFT).creationCode,
                 abi.encode(address(endpoints[aEid])),
                 abi.encodeWithSelector(
-                    MyOFTUpgradeable.initialize.selector,
+                    ArtTokenOFT.initialize.selector,
                     "oftUpgradeable",
                     "oftUpgradeable",
                     owner, // owner is the delegate
@@ -91,7 +91,7 @@ contract MyOFTUpgradeableTest is OFTTest {
         bytes32 implementationRaw = vm.load(address(oftUpgradeable), IMPLEMENTATION_SLOT);
         address implementationAddress = address(uint160(uint256(implementationRaw)));
 
-        MyOFTUpgradeable oftUpgradeableImplementation = MyOFTUpgradeable(implementationAddress);
+        ArtTokenOFT oftUpgradeableImplementation = ArtTokenOFT(implementationAddress);
 
         vm.expectRevert(Initializable.InvalidInitialization.selector);
         oftUpgradeableImplementation.initialize("oftUpgradeable", "oftUpgradeable", owner, INITIAL_MINT_AMOUNT);
@@ -534,7 +534,7 @@ contract MyOFTUpgradeableTest is OFTTest {
 
         // Expect the TokensClaimedAndStaked event
         vm.expectEmit(true, true, true, true);
-        emit MyOFTUpgradeable.TokensClaimedAndStaked(claimer1, CLAIM_AMOUNT);
+        emit ArtTokenOFT.TokensClaimedAndStaked(claimer1, CLAIM_AMOUNT);
 
         // Perform claim
         vm.prank(stakingContract);
