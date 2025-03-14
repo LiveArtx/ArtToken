@@ -86,16 +86,19 @@ const config  = {
     },
     etherscan: {
         apiKey: {
-            'base-testnet': '29FK5DH6V49CWS99WXGSQHXE92XHH8P4CI',
-            'linea-testnet': '714ZUZNV38FX4FD63PND6MQUX214GW7SGV',
+            // 'base-testnet': 'process.env.ETHERSCAN_BASE_API_KEY',
+            'base-testnet': process.env.BLOCKSCOUT_API_KEY,
+            'linea-testnet': process.env.ETHERSCAN_LINEA_API_KEY,
         },
         customChains: [
             {
                 network: 'base-testnet',
                 chainId: 84532,
                 urls: {
+                    // apiURL: 'https://api-sepolia.basescan.org/api',
                     apiURL: 'https://api-sepolia.basescan.org/api',
-                    browserURL: 'https://basescan.org',
+                    // browserURL: 'https://basescan.org',
+                    browserURL: 'https://base-sepolia.blockscout.com/',
                 },
             },
             // {

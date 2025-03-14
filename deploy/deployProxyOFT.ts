@@ -1,5 +1,4 @@
 import { type DeployFunction } from 'hardhat-deploy/types'
-import { BigNumber } from 'ethers'
 
 import { EndpointId, endpointIdToNetwork } from '@layerzerolabs/lz-definitions'
 import { getDeploymentAddressAndAbi } from '@layerzerolabs/lz-evm-sdk-v2'
@@ -16,12 +15,12 @@ const contractName = 'ArtTokenOFT'
 const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { getNamedAccounts, deployments } = hre
 
-    const { deploy } = deployments
+    const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
 
     const name = "ArtToken"
     const symbol = "ART"
-    const initialSupply = BigNumber.from("1000000").mul(BigNumber.from("10").pow(18))
+    const initialSupply = 1000000;
 
     assert(deployer, 'Missing named deployer account')
 
@@ -51,26 +50,31 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { address } = getDeploymentAddressAndAbi(lzNetworkName, 'EndpointV2')
     console.log(`EndpointV2 address: ${address}`)
 
-    const { newlyDeployed } = await deploy(contractName, {
-        from: deployer,
-        args: [address],
-        log: true,
-        waitConfirmations: 1,
-        skipIfAlreadyDeployed: false,
-        proxy: {
-            proxyContract: 'OpenZeppelinTransparentProxy',
-            owner: deployer,
-            execute: {
-                init: {
-                    methodName: 'initialize',
-                    args: [name, symbol, deployer, initialSupply],
+    const { address: proxyAddress,
+        implementationAddress,
+        deploy } = await deterministic(contractName, {
+            salt: process.env.DETERMINISTIC_SALT,
+            from: deployer,
+            args: [address],
+            log: true,
+            waitConfirmations: 1,
+            skipIfAlreadyDeployed: false,
+            proxy: {
+                proxyContract: 'OpenZeppelinTransparentProxy',
+                owner: deployer,
+                execute: {
+                    init: {
+                        methodName: 'initialize',
+                        args: [name, symbol, deployer, initialSupply],
+                    },
                 },
             },
-        },
-    })
+        })
 
-    console.log(`Contract was ${newlyDeployed ? 'deployed' : 'not deployed'}`)
-    console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, address: ${address}`)
+    const { newlyDeployed } = await deploy()
+
+    console.log(`${hre.network.name} contract was ${newlyDeployed ? ' successfully deployed ✅' : 'failed to deploy ❌'}`)
+    console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, proxy address: ${proxyAddress}, implementation address: ${implementationAddress}`)
 }
 
 deploy.tags = [contractName]
