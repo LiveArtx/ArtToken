@@ -69,3 +69,32 @@ This command will compile the contracts and run all the tests in the `test` dire
 ## Contact
 
 For any questions or issues, please contact the development team at [jason@liveart.io].
+
+
+
+# Upgradeable Contracts
+
+# Official Documentation
+https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/start
+
+
+## Proxy Contract
+
+Initial contract: contracts/ArtTokenUpgradeableOFT.sol:ArtTokenOFT
+
+## Endpoints IDs
+
+- Base Testnet: 40245
+
+- Linea Testnet: 40287
+
+## Zero padding
+
+000000000000000000000000
+
+## Options Generator --> createLzReceiveOption
+- _gasLimit 200000
+- _value 0
+
+Remix: https://remix.ethereum.org/#url=https://docs.layerzero.network/LayerZero/contracts/OptionsGenerator.sol&lang=en&optimize=false&runs=200&evmVersion=null&version=soljson-v0.8.24+commit.e11b9ed9.js
+
