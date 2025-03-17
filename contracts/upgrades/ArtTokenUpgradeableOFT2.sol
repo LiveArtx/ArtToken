@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract ArtTokenOFT is OFTUpgradeable, ERC20CappedUpgradeable, Ownable2StepUpgradeable, ERC20PermitUpgradeable {
+contract ArtTokenOFT2 is OFTUpgradeable, ERC20CappedUpgradeable, Ownable2StepUpgradeable, ERC20PermitUpgradeable {
     uint8 public constant DECIMALS = 18;
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** DECIMALS;
     uint256 private _claimableSupply;
@@ -15,6 +15,7 @@ contract ArtTokenOFT is OFTUpgradeable, ERC20CappedUpgradeable, Ownable2StepUpgr
     mapping(address => uint256) private _claimedAmount;
     uint256 private _totalBurned;
     address public stakingContractAddress;
+    bool public isUpdated;
 
     event TokensClaimed(address indexed user, uint256 amount);
     event TokensClaimedAndStaked(address indexed user, uint256 amount);
@@ -35,6 +36,10 @@ contract ArtTokenOFT is OFTUpgradeable, ERC20CappedUpgradeable, Ownable2StepUpgr
         __ERC20Capped_init(MAX_SUPPLY);
         __ERC20Permit_init(_name);
         _mint(_delegate, initialMintAmount * 10 ** decimals());
+    }
+
+    function toggleUpdate() public {
+        isUpdated = !isUpdated;
     }
 
     function decimals() public pure override returns (uint8) {

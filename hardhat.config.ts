@@ -10,10 +10,13 @@ import 'hardhat-contract-sizer'
 import '@nomiclabs/hardhat-ethers'
 import '@layerzerolabs/toolbox-hardhat'
 import '@nomiclabs/hardhat-etherscan'
-import { HardhatUserConfig, HttpNetworkAccountsUserConfig } from 'hardhat/types'
-
+import { HttpNetworkAccountsUserConfig } from 'hardhat/types'
+// import '@openzeppelin/hardhat-upgrades'
 import { EndpointId } from '@layerzerolabs/lz-definitions'
+
 import './tasks/sendMessage';
+import './tasks/upgradeProxy';
+
 import { ethers } from 'ethers'
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
@@ -96,7 +99,7 @@ const config  = {
                 chainId: 84532,
                 urls: {
                     // apiURL: 'https://api-sepolia.basescan.org/api',
-                    apiURL: 'https://api-sepolia.basescan.org/api',
+                    apiURL: 'https://base-sepolia.blockscout.com/api',
                     // browserURL: 'https://basescan.org',
                     browserURL: 'https://base-sepolia.blockscout.com/',
                 },

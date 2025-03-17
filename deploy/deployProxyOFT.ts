@@ -48,7 +48,7 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const lzNetworkName = endpointIdToNetwork(eid)
 
     const { address } = getDeploymentAddressAndAbi(lzNetworkName, 'EndpointV2')
-    console.log(`EndpointV2 address: ${address}`)
+    console.log(`EndpointV2 address: ${address}\n`)
 
     const { address: proxyAddress,
         implementationAddress,
@@ -62,11 +62,12 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
             proxy: {
                 proxyContract: 'OpenZeppelinTransparentProxy',
                 owner: deployer,
+                checkProxyAdmin: true,
                 execute: {
                     init: {
                         methodName: 'initialize',
                         args: [name, symbol, deployer, initialSupply],
-                    },
+                    }
                 },
             },
         })
@@ -74,7 +75,7 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { newlyDeployed } = await deploy()
 
     console.log(`${hre.network.name} contract was ${newlyDeployed ? ' successfully deployed ✅' : 'failed to deploy ❌'}`)
-    console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, proxy address: ${proxyAddress}, implementation address: ${implementationAddress}`)
+    console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, proxy address: ${proxyAddress}, implementation address: ${implementationAddress}\n`)
 }
 
 deploy.tags = [contractName]
