@@ -10,6 +10,7 @@
     <h2>LayerZero OFT Transfer</h2>
     <button id="connectWallet">Connect Wallet</button>
     <p><strong>Connected Address:</strong> <span id="walletAddress">Not connected</span></p>
+    <p><strong>OFT ChainId:</strong> <span id="oftChainId">Not connected</span></p>
     <p><strong>OFT Balance:</strong> <span id="balance">0</span></p>
 
     <h3>Send Tokens</h3>
@@ -22,7 +23,6 @@
     <label>Destination Chain:</label>
     <select id="destinationChain">
         <option value="40245">Base Testnet</option>
-        <option value="40267">Amoy Testnet</option>
         <option value="40287">Linea Testnet</option>
     </select>
     <br />
@@ -36,9 +36,8 @@
     <script>
         let provider, signer, oftContract;
         const oftContracts = {
-            84532: "0xa4e3acCbF198E3E71540166254bB0BAB9aFC0F64", // Base Testnet
-            80002: "0x2819490c746b50b6CFcB9011bd7cDD6a2bDA9F7B", // Amoy Testnet
-            59140: "0xaf167d0aC8eeaA659Af93ADB0C8b5A1a4cd1F804"  // Linea Testnet
+            84532: "0xEeec2DA1372cC2BE54354acb2a501Bcc4d4EcCA0", // Base Testnet
+            59141: "0xEeec2DA1372cC2BE54354acb2a501Bcc4d4EcCA0"  // Linea Testnet
         };
 
         async function connectWallet() {
@@ -57,21 +56,24 @@
         async function updateOFTContract() {
             const network = await provider.getNetwork();
             const chainId = network.chainId;
+            console.log("chainId", chainId);
             const oftAddress = oftContracts[chainId];
 
             if (!oftAddress) {
-                alert("Unsupported network! Switch to Base, Amoy, or Linea testnets.");
+                alert("Unsupported network! Switch to Base, or Linea testnets.");
                 return;
             }
 
             const oftAbi = [
                 "function balanceOf(address owner) view returns (uint256)",
                 "function estimateSendFee(uint32, bytes32, uint256, bool, bytes) view returns (uint256 nativeFee, uint256 lzTokenFee)",
-                "function send((uint32, bytes32, uint256, uint256, bytes, bytes, bytes), (uint256, uint256), address) payable"
+                "function send((uint32, bytes32, uint256, uint256, bytes, bytes, bytes), (uint256, uint256), address) payable",
+                "function quoteSend((uint32, bytes32, uint256, uint256, bytes, bytes, bytes), bool) view returns (uint256 nativeFee, uint256 lzTokenFee)"
             ];
             
             oftContract = new ethers.Contract(oftAddress, oftAbi, signer);
             await updateBalance();
+            document.getElementById("oftChainId").innerText = chainId;
         }
 
         async function updateBalance() {
@@ -88,7 +90,7 @@
             const oftAddress = oftContracts[chainId];
 
             if (!oftAddress) {
-                alert("Unsupported network! Please switch to Base, Amoy, or Linea testnets.");
+                alert("Unsupported network! Please switch to Base, or Linea testnets.");
                 return;
             }
 
@@ -100,31 +102,35 @@
             if (!amount || isNaN(amount)) return alert("Invalid amount!");
 
             const amountWei = ethers.utils.parseEther(amount);
+            console.log("amountWei", amountWei);    
+
             const recipientEncoded = ethers.utils.hexZeroPad(recipient, 32);
+            const options = "0x00030100210100000000000000000000000000030d400000000000000000000000000000000a";
 
             document.getElementById("status").innerText = "Estimating gas...";
 
+            
             try {
-                const sendParam = {
-                    dstEid: parseInt(destinationChainId),
-                    to: recipientEncoded,
-                    amountLD: amountWei.toString(),
-                    minAmountLD: amountWei.toString(),
-                    extraOptions: "0x",
-                    composeMsg: "0x",
-                    oftCmd: "0x"
-                };
-
+                const sendParam = [
+                    parseInt(destinationChainId), // dstEid
+                    recipientEncoded,             // to
+                    amountWei,                    // amountLD
+                    amountWei,                    // minAmountLD
+                    options,                      // extraOptions
+                    "0x",                         // composeMsg
+                    "0x"                          // oftCmd
+                ];
+                
                 console.log({sendParam});
 
-                const [nativeFee, lzTokenFee] = await oftContract.estimateSendFee(destinationChainId, recipientEncoded, amountWei, false, "0x");
+                const [nativeFee, lzTokenFee] = await oftContract.quoteSend(sendParam, false);
 
-              
+                console.log({nativeFee: nativeFee.toString(), lzTokenFee: lzTokenFee.toString()});
 
-                const messagingFee = {
-                    nativeFee: nativeFee.toString(),
-                    lzTokenFee: lzTokenFee.toString()
-                };
+                const messagingFee = [
+                    nativeFee.toString(),
+                    lzTokenFee.toString()
+            ];
 
                 console.log({messagingFee});
 
@@ -136,31 +142,24 @@
                     refundAddress
                 }, null, 4);
 
+                console.log(" value: messagingFee.nativeFee", messagingFee.nativeFee);
+
+                // console.log("ethers.BigNumber.from(nativeFee.toString())", ethers.BigNumber.from(nativeFee.toString()));
+
+                console.log({ sendParam,
+                    messagingFee,
+                    refundAddress,
+                    value: messagingFee.nativeFee })
+
                 const tx = await oftContract.send(
                     sendParam,
                     messagingFee,
                     refundAddress,
-                    { value: nativeFee }
+                    { value: ethers.BigNumber.from(nativeFee.toString()) }
                 );
 
                 document.getElementById("status").innerText = "Transaction pending...";
                 const receipt = await tx.wait();
-
-                const { msgReceipt, oftReceipt } = receipt.events.find(e => e.event === "MessageSent").args;
-
-                document.getElementById("txDetails").innerText += `\n\nMessagingReceipt:\n${JSON.stringify({
-                    guid: msgReceipt.guid,
-                    nonce: msgReceipt.nonce.toString(),
-                    fee: {
-                        nativeFee: msgReceipt.fee.nativeFee.toString(),
-                        lzTokenFee: msgReceipt.fee.lzTokenFee.toString()
-                    }
-                }, null, 4)}`;
-
-                document.getElementById("txDetails").innerText += `\n\nOFTReceipt:\n${JSON.stringify({
-                    amountSentLD: oftReceipt.amountSentLD.toString(),
-                    amountReceivedLD: oftReceipt.amountReceivedLD.toString()
-                }, null, 4)}`;
 
                 document.getElementById("status").innerText = "Transfer successful!";
                 await updateBalance();
