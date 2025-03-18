@@ -10,6 +10,8 @@ This is the smart contract for the ArtToken. It is a upgradeable contract that u
 * [OFT Standard Specification](https://docs.layerzero.network/v2/developers/evm/oft/quickstart)
 * [Options Generator](https://remix.ethereum.org/#url=https://docs.layerzero.network/LayerZero/contracts/OptionsGenerator.sol&lang=en&optimize=false&runs=200&evmVersion=null&version=soljson-v0.8.24+commit.e11b9ed9.js)
  * [LayerZero Scan](https://docs.layerzero.network/v2/developers/evm/technical-reference/layerzero-scan)
+ * [Deploying Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/deploying)
+ * [Configuring Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/configuring-pathways)
 
 
 ## Upgradeable Contracts
