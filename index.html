@@ -213,6 +213,7 @@
 
               const refundAddress = await signer.getAddress();
 
+              // Only reference to log out the sendParam in the browser
               const logSendParam = [
                   parseInt(destinationChainId), // dstEid
                   recipientEncoded,             // to

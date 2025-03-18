@@ -11,7 +11,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {ERC20CappedUpgradeable} from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 
-contract ArtTokenTest is OFTTest {
+contract ArtTokenTestOFT is OFTTest {
     bytes32 internal constant IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
     ArtTokenOFT oftUpgradeable;
 
