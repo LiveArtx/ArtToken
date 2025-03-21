@@ -38,10 +38,13 @@ yarn run test
 ## Deployment Steps
 1. Save a salt in env —> DETERMINISTIC_SALT=<your salt here>
 2. configure `hardhat.config.ts`
+    - [Configuring Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/configuring-pathways)
 3. npx hardhat lz:deploy --stage testnet --tags ArtTokenOFT --reset
 4. Verify contracts
     - npx hardhat verify <Implementation Contract Address> --network base-testnet <EndpointV2 address - constructor arg>
-5. setPeer contracts - use the `setPeer` function in the deployed proxy contract. It requires the following parameters:
+5. configure `layerzero.simple.config.ts`
+    - npx hardhat lz:oapp:wire --oapp-config layerzero.simple.config.ts
+6. setPeer (Optional - Manual) contracts - use the `setPeer` function in the deployed proxy contract. It requires the following parameters:
     - _eid: the endpoint id of the deployed contract
     - _peer: the address of the peer contract zero padded to 32 bytes
     
