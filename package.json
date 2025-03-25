@@ -17,7 +17,9 @@
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "test": "$npm_execpath run test:forge && $npm_execpath run test:hardhat",
     "test:forge": "forge test",
-    "test:hardhat": "hardhat test"
+    "test:hardhat": "hardhat test",
+    "coverage:build": "forge coverage --fork-url 'https://mainnet.infura.io/v3/a6ad1943144e4f8297947cf79ef5c56e' --match-path 'test/*.t.sol' --report lcov --ir-minimum --via-ir",
+    "coverage:view" : "genhtml lcov.info --branch-coverage --output-dir coverage && open coverage/index.html"
   },
   "resolutions": {
     "ethers": "^5.7.2",

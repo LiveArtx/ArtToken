@@ -2,7 +2,6 @@
 solc-version = '0.8.22'
 src = 'contracts'
 out = 'out'
-test = 'test/foundry'
 cache_path = 'cache/foundry'
 verbosity = 3
 optimizer = true
@@ -21,6 +20,7 @@ libs = [
     # - solidity-bytes-utils
     'node_modules/@layerzerolabs/toolbox-foundry/lib',
     'node_modules',
+    'lib'
 ]
 
 remappings = [
@@ -32,6 +32,7 @@ remappings = [
     'forge-std/=node_modules/@layerzerolabs/toolbox-foundry/lib/forge-std',
     '@layerzerolabs/=node_modules/@layerzerolabs/',
     '@openzeppelin/=node_modules/@openzeppelin/',
+    'openzeppelin-foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/'
 ]
 
 [fuzz]

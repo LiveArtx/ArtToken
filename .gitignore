@@ -7,3 +7,4 @@ out/
 
 # Environment variables
 .env
+node_modules
