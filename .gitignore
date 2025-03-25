@@ -8,3 +8,11 @@ out/
 # Environment variables
 .env
 node_modules
+
+# Coverage
+lcov.info
+/coverage
+
+# Other
+.osmium
+.vscode
