@@ -87,6 +87,25 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
         assertEq(artTokenContract.balanceOf(user1), mintAmount);
     }
 
+    function test_should_set_staking_contract_when_authorized() public {
+        vm.startPrank(deployer);
+        artTokenContract.setStakingContractAddress(address(1));
+        assertNotEq(artTokenContract.stakingContractAddress(), address(0));
+    }
+
+    function test_should_revert_when_setting_staking_address_unauthorized() public {
+        vm.startPrank(unauthorizedUser);
+
+         vm.expectRevert(
+            abi.encodeWithSelector(
+                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                unauthorizedUser
+            )
+        );
+
+        artTokenContract.setStakingContractAddress(address(1));
+    }
+
     
 
     function test_should_revert_when_setting_tge_enabled_at_for_non_zero_total_users_claimed() public {

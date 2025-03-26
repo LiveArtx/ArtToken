@@ -93,6 +93,24 @@ abstract contract ContractUnderTest is Test {
         vm.stopPrank();
     }
 
+    function _setStakingContract(address _stakingContract) internal {
+        vm.startPrank(deployer);
+        artTokenContract.setStakingContractAddress(_stakingContract);
+        vm.stopPrank();
+    }
+
+    function _setClaimableSupply(uint256 _amount) internal {
+        vm.startPrank(deployer);
+        artTokenContract.setClaimableSupply(_amount);
+        vm.stopPrank();
+    }
+
+    function _setTgeEnabledAt(uint256 _time) internal {
+        vm.startPrank(deployer);
+        artTokenContract.setTgeEnabledAt(_time);
+        vm.stopPrank();
+    }
+
     
 
 }

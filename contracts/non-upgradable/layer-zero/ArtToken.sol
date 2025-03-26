@@ -84,6 +84,18 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
         tgeEnabledAt = _tgeEnabledAt;
     }
 
+     /// @notice Sets the staking contract address
+    /// @param _stakingContract The address of the staking contract
+    function setStakingContractAddress(address _stakingContract) external onlyOwner {
+        require(_stakingContract != address(0), "Invalid staking contract address");
+        stakingContractAddress = _stakingContract;
+    }
+
+
+    function enableTGE(uint256 _startTime) public onlyOwner {
+        tgeEnabledAt = _startTime;
+    }
+
 
    
      /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -95,17 +107,18 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     /// @param allocatedAmount The total number of tokens allocated to the user.
     /// @param merkleProof An array of bytes32 hashes proving the user's inclusion in the merkle tree.
     function claim(uint256 allocatedAmount, bytes32[] calldata merkleProof) public {
-        _verifyMerkleProof(msg.sender, allocatedAmount, merkleProof);
-        uint256 releaseAmount = _calculateReleaseAmount(msg.sender, allocatedAmount);
+        _verifyMerkleProof(_msgSender(), allocatedAmount, merkleProof);
+        uint256 releaseAmount = calculateReleaseAmount(_msgSender(), allocatedAmount);
 
-        assert((claims[msg.sender].claimed + releaseAmount) <= allocatedAmount);
+        assert((claims[_msgSender()].claimed + releaseAmount) <= allocatedAmount);
 
          // Update total users claimed if the user has not claimed yet
-        if(claims[msg.sender].claimed == 0) {
+        if(claims[_msgSender()].claimed == 0) {
+            claims[_msgSender()].amount = allocatedAmount;
             totalUsersClaimed++;
         }
 
-        _processClaim(msg.sender, releaseAmount);
+        _processClaim(_msgSender(), releaseAmount);
     }
 
     /// @notice Allows the staking contract to claim tokens for a user
@@ -117,19 +130,18 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     {
         address _stakingContract = stakingContractAddress;
         require(_stakingContract != address(0), "Staking contract not set");
-        require(msg.sender == _stakingContract, "Invalid staking contract address");
+        require(_msgSender() == _stakingContract, "Invalid staking contract address");
 
         // Create leaf node with total allocation amount using the receiver's address
         bytes32 leaf = keccak256(abi.encodePacked(receiver, allocatedAmount));
 
-        // Verify merkle proof
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
+        require(claims[receiver].claimed == 0, "User already claim");
 
-        // Ensure that the user has but already claimed.
-        Claim storage userClaim = claims[receiver];
-        require(userClaim.claimed == 0, "User already claim");
+        claims[receiver].amount = allocatedAmount;
+        totalUsersClaimed++;
 
-        _processClaim(msg.sender, allocatedAmount); 
+        _processClaim(receiver, allocatedAmount); 
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ BURN FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -165,8 +177,8 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
      /// @notice Returns the amount of tokens claimed by an address
     /// @param account The address to check
     /// @return uint256 Amount of tokens claimed so far
-    function claimedByAccount(address account) external view returns (uint256) {
-        return claims[account].claimed;
+    function claimDetailsByAccount(address account) external view returns (Claim memory) {
+        return claims[account];
     }
 
     /// @notice Returns the cap of the token
@@ -174,31 +186,20 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
         return MAX_SUPPLY - totalBurned;
     }
 
-
-
-    /// @notice Sets the staking contract address
-    /// @param _stakingContract The address of the staking contract
-    function setStakingContractAddress(address _stakingContract) external onlyOwner {
-        require(stakingContractAddress != address(0), "Invalid staking contract address");
-        stakingContractAddress = _stakingContract;
-    }
-
-
-    function enableTGE(uint256 _startTime) public onlyOwner {
-        tgeEnabledAt = _startTime;
-    }
-
     function isTGEActive() public view returns (bool) {
         return tgeEnabledAt > 0 && block.timestamp >= tgeEnabledAt && block.timestamp <= tgeEnabledAt + TGE_DURATION;
     }
 
-    function claimingPeriods() public view returns (uint256, uint256, uint256) {
-        uint256 tgeStart = tgeEnabledAt;
-        uint256 tgeEnd = tgeStart + TGE_DURATION;
-        uint256 vestingEnd = tgeEnd + VESTING_DURATION;
-        return(tgeStart, tgeEnd, vestingEnd);
+    function claimingPeriods() public view returns (uint256 tgeStart, uint256 tgeEnd, uint256 vestingEnd) {
+        tgeStart = tgeEnabledAt;
+        tgeEnd = tgeStart + TGE_DURATION;
+        vestingEnd = tgeEnd + VESTING_DURATION;
     }
 
+    function calculateDailyRelease(uint256 _allocatedAmount, uint256 _claimed) public pure returns (uint256) {
+        uint256 remaining = _allocatedAmount - _claimed;
+        return FixedPointMathLib.divWadDown(remaining, uint256(VESTING_DURATION) * 1e18);
+    }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ HELPER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
     function _verifyMerkleProof(address claimer, uint256 allocatedAmount, bytes32[] calldata merkleProof) private view {
@@ -206,7 +207,7 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
     }
 
-    function _calculateReleaseAmount(address claimer, uint256 allocatedAmount) private returns (uint256 releaseAmount) {
+    function calculateReleaseAmount(address claimer, uint256 allocatedAmount) private returns (uint256 releaseAmount) {
         require(tgeEnabledAt > 0, "TGE not enabled");
         Claim storage userClaim = claims[claimer];
 
@@ -220,20 +221,21 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
         if (isTGEActive()) {
             require(!userClaim.claimedAtTGE, "Already claimed TGE amount");
             uint256 tgeAmount = FixedPointMathLib.mulWadDown(allocatedAmount, 0.25e18);
+            uint256 drip = calculateDailyRelease(allocatedAmount, tgeAmount);
+            userClaim.dailyRelease = drip;
             return tgeAmount;
         }
 
         // During vesting period
         require(userClaim.lastClaimed + 1 days <= block.timestamp, "Claim only once per day");
         if (userClaim.dailyRelease == 0) {
-            // Calculate remaining amount based on what's left after any claims
-            uint256 remaining = allocatedAmount - userClaim.claimed;
-            // Calculate daily release using remaining amount
-            uint256 dailyRelease = FixedPointMathLib.divWadDown(remaining, uint256(VESTING_DURATION) * 1e18);
-            userClaim.dailyRelease = dailyRelease;
-            return dailyRelease;
+            uint256 drip = calculateDailyRelease(allocatedAmount, userClaim.claimed);
+            userClaim.dailyRelease = drip;
+            return releaseAmount;
         }
     }
+
+   
 
 
     function _processClaim(address claimer, uint256 releaseAmount) private {
