@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MIT UNLICENSED
 pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
-import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
+import {ArtToken} from "contracts/ArtTokenUpgradeable.sol";
+import {ContractUnderTestUpgradable} from "./base-setup/ContractUnderTestUpgradeable.sol";
 
-contract ArtToken_Constructor is ContractUnderTest {
+contract ArtToken_Initialize is ContractUnderTestUpgradable {
 
     function setUp() public virtual override{
-        ContractUnderTest.setUp();
+        ContractUnderTestUpgradable.setUp();
     }
 
     function test_should_set_correct_contract_name() public view {
-        assertEq(artTokenContract.name(), "ArtToken");
+        assertEq(artTokenContract.name(), "ArtTokenUpgradeable");
     }
 
     function test_should_set_correct_contract_symbol() public view {
-        assertEq(artTokenContract.symbol(), "ART");
+        assertEq(artTokenContract.symbol(), "ART_UPGRADEABLE");
     }
 
     function test_should_set_correct_contract_decimals() public view {

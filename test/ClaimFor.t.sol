@@ -1,10 +1,9 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+// SPDX-License-Identifier: MIT UNLICENSED
+pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/non-upgradable/layer-zero/ArtToken.sol";
-import {StakingMock} from "contracts/mocks/StakingMock.sol";
-import {ContractUnderTest} from "./ContractUnderTest.sol";
-import "forge-std/Console.sol";
+import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
+import {StakingMock} from "./mocks/StakingMock.sol";
+import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
 contract ArtToken_ClaimFor is ContractUnderTest {
     StakingMock stakingMock;
@@ -18,6 +17,8 @@ contract ArtToken_ClaimFor is ContractUnderTest {
          uint256 allocatedAmount = CLAIM_AMOUNT;
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
+        _setTgeEnabledAt(block.timestamp - 1);
+
         vm.startPrank(claimer1);
         vm.expectRevert("Staking contract not set");
         artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
@@ -25,6 +26,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
     function test_should_revert_when_staking_contract_is_set_invalid() public {
         _setStakingContract(address(stakingMock));
+        _setTgeEnabledAt(block.timestamp - 1);
 
          uint256 allocatedAmount = CLAIM_AMOUNT;
         (, bytes32[] memory merkleProof) = _claimerDetails();
@@ -36,6 +38,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
     function test_should_revert_when_merkle_root_is_invalid() public {
         _setStakingContract(address(stakingMock));
+        _setTgeEnabledAt(block.timestamp - 1);
 
         vm.startPrank(address(stakingMock));
         uint256 allocatedAmount = CLAIM_AMOUNT;
@@ -45,7 +48,9 @@ contract ArtToken_ClaimFor is ContractUnderTest {
     }
 
     function test_should_revert_when_already_claimed() public {
+        _setTgeEnabledAt(block.timestamp - 1);
         _setStakingContract(address(stakingMock));
+        
         (, bytes32[] memory merkleProof) = _claimerDetails(); 
 
          vm.startPrank(address(stakingMock));
@@ -62,6 +67,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
     function test_should_revert_when_releaseAmount_exceeds_claimable_supply() public {
         _setStakingContract(address(stakingMock));
         _setClaimableSupply(100 wei);
+        _setTgeEnabledAt(block.timestamp - 1);
 
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
@@ -74,6 +80,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
     function test_should_update_user_claim_details() public {
         _setStakingContract(address(stakingMock));
+        _setTgeEnabledAt(block.timestamp - 1);
 
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
@@ -88,11 +95,12 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         assertEq(claimDetails.claimed, allocatedAmount);
         assertEq(claimDetails.lastClaimed, block.timestamp);
         assertEq(claimDetails.dailyRelease, 0);
-        assertEq(claimDetails.claimedAtTGE, false);
+        assertEq(claimDetails.claimedAtTGE, true);
     }
 
     function test_should_update_totalUsersClaimed_counter() public {
         _setStakingContract(address(stakingMock));
+        _setTgeEnabledAt(block.timestamp - 1);
 
         (, bytes32[] memory merkleProof) = _claimerDetails();
 

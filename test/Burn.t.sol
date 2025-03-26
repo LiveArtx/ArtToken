@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+// SPDX-License-Identifier: MIT UNLICENSED
+pragma solidity 0.8.26;
 
-import {ContractUnderTest} from "./ContractUnderTest.sol";
+import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
-contract ArtToken_Burn is ContractUnderTest {
+contract ArtToken_Initializer is ContractUnderTest {
 
     function setUp() public virtual override{
         ContractUnderTest.setUp();

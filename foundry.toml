@@ -1,11 +1,11 @@
 [profile.default]
-solc-version = '0.8.22'
+solc-version = '0.8.26'
 src = 'contracts'
 out = 'out'
 cache_path = 'cache/foundry'
 verbosity = 3
 optimizer = true
-optimizer_runs = 20_000
+optimizer-runs = 15_000
 ast = true
 ffi = true
 build_info = true

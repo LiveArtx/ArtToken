@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+pragma solidity 0.8.26;
 
-import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-import "@openzeppelin/contracts/access/Ownable2Step.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {FixedPointMathLib} from "contracts/lib/FixedPointMathLib.sol";
-import "forge-std/Console.sol";
+import {FixedPointMathLib} from "contracts/libraries/FixedPointMathLib.sol";
 
-contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
+contract ArtToken is OFTUpgradeable, ERC20CappedUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeable {
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CONSTANTS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
     uint8 public constant DECIMALS = 18;
     uint256 public constant TGE_DURATION = 7 days;
@@ -41,17 +40,20 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     event SetClaimableSupply(uint256 amount);
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CONSTRUCTOR ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _lzEndpoint,
-        address _delegate,
-        uint256 initialMintAmount
-    ) OFT(_name, _symbol, _lzEndpoint, _delegate) 
-      Ownable(_delegate) 
-      ERC20Capped(MAX_SUPPLY) 
-      ERC20Permit(_name) 
-      {
+    constructor(address _lzEndpoint) OFTUpgradeable(_lzEndpoint) {
+        _disableInitializers();
+    }
+
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ INITIALIZER ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+
+    function initialize(string memory _name, string memory _symbol, address _delegate, uint256 initialMintAmount)
+        public
+        initializer
+    {
+        __OFT_init(_name, _symbol, _delegate);
+        __Ownable_init(_delegate);
+        __ERC20Capped_init(MAX_SUPPLY);
+        __ERC20Permit_init(_name);
         if (initialMintAmount > 0) {
             _mint(_delegate, initialMintAmount * 10 ** decimals());
         }
@@ -183,7 +185,7 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     }
 
     /// @notice Returns the cap of the token
-    function cap() public view virtual override(ERC20Capped) returns (uint256) {
+    function cap() public view virtual override(ERC20CappedUpgradeable) returns (uint256) {
         return MAX_SUPPLY - totalBurned;
     }
 
@@ -241,9 +243,6 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
         }
     }
 
-   
-
-
     function _processClaim(address claimer, uint256 releaseAmount) private {
         Claim storage userClaim = claims[claimer];
         
@@ -262,17 +261,17 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-    function _update(address from, address to, uint256 value) internal virtual override(ERC20, ERC20Capped) {
+    function _update(address from, address to, uint256 value) internal virtual override(ERC20Upgradeable, ERC20CappedUpgradeable) {
         super._update(from, to, value);
     }
 
     // Override the conflicting functions
-    function transferOwnership(address newOwner) public virtual override(Ownable, Ownable2Step) onlyOwner {
-        Ownable2Step.transferOwnership(newOwner);
+    function transferOwnership(address newOwner) public virtual override(OwnableUpgradeable, Ownable2StepUpgradeable) onlyOwner {
+        Ownable2StepUpgradeable.transferOwnership(newOwner);
     }
 
-    function _transferOwnership(address newOwner) internal virtual override(Ownable, Ownable2Step) {
-        Ownable2Step._transferOwnership(newOwner);
+    function _transferOwnership(address newOwner) internal virtual override(OwnableUpgradeable, Ownable2StepUpgradeable) {
+        Ownable2StepUpgradeable._transferOwnership(newOwner);
     }
 
 

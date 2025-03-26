@@ -1,10 +1,9 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+// SPDX-License-Identifier: MIT UNLICENSED
+pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/non-upgradable/layer-zero/ArtToken.sol";
-import {FixedPointMathLib} from "contracts/lib/FixedPointMathLib.sol";
-import {ContractUnderTest} from "./ContractUnderTest.sol";
-import "forge-std/Console.sol";
+import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
+import {FixedPointMathLib} from "contracts/libraries/FixedPointMathLib.sol";
+import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
 contract ArtToken_Claim is ContractUnderTest {
 
@@ -12,9 +11,9 @@ contract ArtToken_Claim is ContractUnderTest {
         ContractUnderTest.setUp();
     }
 
-
-
     function test_should_revert_when_merkle_proof_is_invalid() public {
+        _setTgeEnabledAt(block.timestamp - 1);
+
         vm.startPrank(claimer1);
         vm.expectRevert("Invalid merkle proof");
         artTokenContract.claim(CLAIM_AMOUNT, new bytes32[](0));
@@ -218,23 +217,28 @@ contract ArtToken_Claim is ContractUnderTest {
 
         uint256 totalClaimed;
 
-        for(uint256 i; i < 180; i++){
-            totalClaimed += dailyReleaseAmount;
+        // First claim at tgeEnd
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        totalClaimed += dailyReleaseAmount;
+
+        // Then loop for remaining days
+        for(uint256 i = 2; i <= 180; i++) {
+            vm.warp(tgeEnd + (i * 1 days));
             artTokenContract.claim(allocatedAmount, merkleProof);
-            vm.warp(block.timestamp + 1 days);
+            totalClaimed += dailyReleaseAmount;
         }
 
         ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
 
         // User Details
         assertEq(claimDetails.amount, allocatedAmount);
-        assertEq(claimDetails.claimed, totalClaimed);
-        assertEq(claimDetails.lastClaimed, block.timestamp - 1 days);
+        assertApproxEqAbs(claimDetails.claimed, totalClaimed, 100);
+        assertEq(claimDetails.lastClaimed, block.timestamp);
         assertEq(claimDetails.dailyRelease, dailyReleaseAmount);
         assertEq(claimDetails.claimedAtTGE, false);
 
-        // User Balance
-        assertEq(artTokenContract.balanceOf(claimer1), totalClaimed);
+        // User Balance (100 wei rounding loss)
+        assertApproxEqAbs(artTokenContract.balanceOf(claimer1), totalClaimed, 100);
     }
 
      function test_should_update_user_balance_after_claim_at_tge_twice_vesting_remainder_post_vesting() public {

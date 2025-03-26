@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+// SPDX-License-Identifier: MIT UNLICENSED
+pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/non-upgradable/layer-zero/ArtToken.sol";
+import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
 import "forge-std/Test.sol";
 
 abstract contract ContractUnderTest is Test {

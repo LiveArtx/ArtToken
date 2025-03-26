@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+// SPDX-License-Identifier: MIT UNLICENSED
+pragma solidity 0.8.26;
 
-import {ContractUnderTest} from "./ContractUnderTest.sol";
+import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
 contract ArtToken_Getters is ContractUnderTest {
 
