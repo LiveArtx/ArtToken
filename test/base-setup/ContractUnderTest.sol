@@ -28,7 +28,7 @@ abstract contract ContractUnderTest is Test {
 
     function setUp() public virtual {
         // Mainnet fork
-        string memory mainnet_rpc_url_key = "MAINNET_RPC_URL";
+        string memory mainnet_rpc_url_key = "ALCHEMY_URL";
         string memory mainnet_rpc_url = vm.envString(mainnet_rpc_url_key);
         mainnetFork = vm.createFork(mainnet_rpc_url);
 

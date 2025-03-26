@@ -10,7 +10,7 @@ import assert from 'assert'
 // configure `hardhat.config.ts`
 // npx hardhat lz:deploy
 
-const contractName = 'ArtTokenOFT'
+const contractName = 'ArtTokenUpgradeable:ArtTokenOFT'
 
 const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { getNamedAccounts, deployments } = hre
