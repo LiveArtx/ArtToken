@@ -111,6 +111,12 @@ abstract contract ContractUnderTest is Test {
         vm.stopPrank();
     }
 
+    function _mintTokens(address _to, uint256 _amount) internal {
+        vm.startPrank(deployer);
+        artTokenContract.mint(_to, _amount);
+        vm.stopPrank();
+    }
+
     
 
 }

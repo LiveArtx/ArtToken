@@ -92,7 +92,8 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     }
 
 
-    function enableTGE(uint256 _startTime) public onlyOwner {
+    function setTgeStartTime(uint256 _startTime) public onlyOwner {
+        require(totalUsersClaimed == 0, "TGE already started");
         tgeEnabledAt = _startTime;
     }
 

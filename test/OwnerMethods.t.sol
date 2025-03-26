@@ -108,12 +108,61 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
 
     
 
-    function test_should_revert_when_setting_tge_enabled_at_for_non_zero_total_users_claimed() public {
-        // TODO: Implement this
+    function test_should_revert_if_setting_tge_enabled_when_tge_already_started() public {
+        _performClaimAfterVestingPeriod(claimer1);
+
+        vm.startPrank(deployer);
+        uint256 startTime = block.timestamp + 1 days;
+        vm.expectRevert("TGE already started");
+        artTokenContract.setTgeStartTime(startTime);
     }
 
-    function test_should_set_tge_enabled_at_when_total_users_claimed_is_zero() public {
-        // TODO: Implement this
+     function test_should_set_tge_enabled_when_authorized() public {
+        vm.startPrank(deployer);
+        uint256 startTime = block.timestamp + 1 days;
+        artTokenContract.setTgeStartTime(startTime);
+
+        assertEq(artTokenContract.tgeEnabledAt(), startTime);
+    }
+
+    function test_should_revert_if_attempting_to_set_tge_enabled_when_unauthorized() public {
+        vm.startPrank(unauthorizedUser);
+        uint256 startTime = block.timestamp + 1 days;
+        
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                unauthorizedUser
+            )
+        );
+
+        artTokenContract.setTgeStartTime(startTime);
+    }
+
+    function test_should_transfer_ownership_if_authorized() public {
+        address newOwner = user1;
+
+        vm.startPrank(deployer);
+        artTokenContract.transferOwnership(newOwner);
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+        artTokenContract.acceptOwnership();
+        
+        assertEq(artTokenContract.owner(), newOwner);
+    }
+
+    function test_should_revert_when_attempting_to_transfer_ownership_when_unauthorized() public {
+        vm.startPrank(unauthorizedUser);
+        
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                unauthorizedUser
+            )
+        );
+
+        artTokenContract.transferOwnership(unauthorizedUser);
     }
     
     
