@@ -13,7 +13,7 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CONSTANTS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
     uint8 public constant DECIMALS = 18;
     uint256 public constant TGE_DURATION = 7 days;
-    uint256 public constant VESTING_DURATION = 180;
+    uint256 public constant VESTING_DURATION = 180 days;
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** DECIMALS;
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ STORAGE ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -198,7 +198,8 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
 
     function calculateDailyRelease(uint256 _allocatedAmount, uint256 _claimed) public pure returns (uint256) {
         uint256 remaining = _allocatedAmount - _claimed;
-        return FixedPointMathLib.divWadDown(remaining, uint256(VESTING_DURATION) * 1e18);
+        uint256 vestingCliff = 180; // days
+        return FixedPointMathLib.divWadDown(remaining, uint256(vestingCliff) * 1e18);
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ HELPER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -221,17 +222,21 @@ contract ArtToken is OFT, Ownable2Step, ERC20Capped, ERC20Permit {
         if (isTGEActive()) {
             require(!userClaim.claimedAtTGE, "Already claimed TGE amount");
             uint256 tgeAmount = FixedPointMathLib.mulWadDown(allocatedAmount, 0.25e18);
-            uint256 drip = calculateDailyRelease(allocatedAmount, tgeAmount);
-            userClaim.dailyRelease = drip;
+
+            // Update claim record
+            userClaim.dailyRelease = calculateDailyRelease(allocatedAmount, tgeAmount);
             return tgeAmount;
         }
 
         // During vesting period
         require(userClaim.lastClaimed + 1 days <= block.timestamp, "Claim only once per day");
+
         if (userClaim.dailyRelease == 0) {
             uint256 drip = calculateDailyRelease(allocatedAmount, userClaim.claimed);
             userClaim.dailyRelease = drip;
-            return releaseAmount;
+            return drip;
+        } else {
+            return userClaim.dailyRelease;
         }
     }
 

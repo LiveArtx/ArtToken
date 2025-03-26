@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import {ArtToken} from "contracts/non-upgradable/layer-zero/ArtToken.sol";
 import {FixedPointMathLib} from "contracts/lib/FixedPointMathLib.sol";
 import {ContractUnderTest} from "./ContractUnderTest.sol";
-
+import "forge-std/Console.sol";
 
 contract ArtToken_Claim is ContractUnderTest {
 
@@ -12,26 +12,7 @@ contract ArtToken_Claim is ContractUnderTest {
         ContractUnderTest.setUp();
     }
 
-    function test_should_claim_after_vesting_period() public {
-        uint256 allocatedAmount = CLAIM_AMOUNT;
 
-        (, bytes32[] memory merkleProof) = _claimerDetails();
-        (,,uint256 vestingEnd) = artTokenContract.claimingPeriods();
-
-        // Set the TGE enabled at to a time in the past
-        _setTgeEnabledAt(block.timestamp - 1);
-
-        // warp to end of vesting period
-        vm.warp(block.timestamp + vestingEnd);
-
-        // claim the tokens
-        vm.startPrank(claimer1);
-        artTokenContract.claim(allocatedAmount, merkleProof);
-        vm.stopPrank();
-
-        // assert the tokens were claimed
-        assertEq(artTokenContract.balanceOf(claimer1), allocatedAmount);
-    }
 
     function test_should_revert_when_merkle_proof_is_invalid() public {
         vm.startPrank(claimer1);
@@ -125,7 +106,7 @@ contract ArtToken_Claim is ContractUnderTest {
         uint256 expectedTgeReleaseAmount = FixedPointMathLib.mulWadDown(allocatedAmount, 0.25e18);
         uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, expectedTgeReleaseAmount);
 
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
 
         ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
 
@@ -134,29 +115,80 @@ contract ArtToken_Claim is ContractUnderTest {
         assertEq(claimDetails.claimed, expectedTgeReleaseAmount);
         assertEq(claimDetails.lastClaimed, block.timestamp);
         assertEq(claimDetails.dailyRelease, dailyReleaseAmount);
-        assertEq(claimDetails.claimedAtTGE, false);
+        assertEq(claimDetails.claimedAtTGE, true);
 
         // User Balance
         assertEq(artTokenContract.balanceOf(claimer1), expectedTgeReleaseAmount);
     }
 
-     function test_should_update_user_claim_details_after_vesting_claim_only() public {
-         _setTgeEnabledAt(block.timestamp - 1);
 
+     function test_should_update_user_claim_details_after_a_tge_and_vesting_claim() public {
+        _setTgeEnabledAt(block.timestamp - 1);
 
+         assertTrue(artTokenContract.isTGEActive());
+
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        vm.startPrank(address(claimer1));
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        uint256 expectedTgeReleaseAmount = FixedPointMathLib.mulWadDown(allocatedAmount, 0.25e18);
+        uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, expectedTgeReleaseAmount);
+
+        artTokenContract.claim(allocatedAmount, merkleProof);
+
+        ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
+
+        // User Details
+        assertEq(claimDetails.amount, allocatedAmount);
+        assertEq(claimDetails.claimed, expectedTgeReleaseAmount);
+        assertEq(claimDetails.lastClaimed, block.timestamp);
+        assertEq(claimDetails.dailyRelease, dailyReleaseAmount);
+        assertEq(claimDetails.claimedAtTGE, true);
+
+        // User Balance
+        assertEq(artTokenContract.balanceOf(claimer1), expectedTgeReleaseAmount);
 
         // Ensure we are in the vesting window.
-         vm.warp(block.timestamp + 10 days);
-        ( , uint256 tgeEnd, uint256 vestingEnd) = artTokenContract.claimingPeriods();
+        (, uint256 tgeEnd, uint256 vestingEnd) = artTokenContract.claimingPeriods();
+        vm.warp(tgeEnd + 5 days);
+        assert(block.timestamp > tgeEnd && block.timestamp < vestingEnd);
+
+
+        vm.startPrank(address(claimer1));
+        uint256 releaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, expectedTgeReleaseAmount);
+
+        artTokenContract.claim(allocatedAmount, merkleProof);
+
+        ArtToken.Claim memory claimDetailsAfterVestingClaim = artTokenContract.claimDetailsByAccount(claimer1);
+
+        // User Details
+        assertEq(claimDetailsAfterVestingClaim.amount, allocatedAmount);
+        assertEq(claimDetailsAfterVestingClaim.claimed, expectedTgeReleaseAmount + releaseAmount);
+        assertEq(claimDetailsAfterVestingClaim.lastClaimed, block.timestamp);
+        assertEq(claimDetailsAfterVestingClaim.dailyRelease, dailyReleaseAmount);
+        assertEq(claimDetailsAfterVestingClaim.claimedAtTGE, true);
+
+        // User Balance
+        assertEq(artTokenContract.balanceOf(claimer1), expectedTgeReleaseAmount + releaseAmount);
+    }
+
+    
+
+     function test_should_update_user_claim_details_during_vesting_claim_only() public {
+         _setTgeEnabledAt(block.timestamp - 1);
+
+        // Ensure we are in the vesting window.
+        (, uint256 tgeEnd, uint256 vestingEnd) = artTokenContract.claimingPeriods();
+        vm.warp(tgeEnd + 5 days);
         assert(block.timestamp > tgeEnd && block.timestamp < vestingEnd);
 
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
         vm.startPrank(address(claimer1));
         uint256 allocatedAmount = CLAIM_AMOUNT;
-        uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, allocatedAmount);
+        uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, 0);
 
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
 
         ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
 
@@ -171,7 +203,125 @@ contract ArtToken_Claim is ContractUnderTest {
         assertEq(artTokenContract.balanceOf(claimer1), dailyReleaseAmount);
     }
 
-    // Todo: tge claim, vesting claims till complete (180 days);
+      function test_should_update_user_balance_after_claiming_everyday_during_vesting_only() public {
+         _setTgeEnabledAt(block.timestamp - 1);
+
+        // Ensure we are in the vesting window.
+        (, uint256 tgeEnd, ) = artTokenContract.claimingPeriods();
+        vm.warp(tgeEnd + 1);
+
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        vm.startPrank(address(claimer1));
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, 0);
+
+        uint256 totalClaimed;
+
+        for(uint256 i; i < 180; i++){
+            totalClaimed += dailyReleaseAmount;
+            artTokenContract.claim(allocatedAmount, merkleProof);
+            vm.warp(block.timestamp + 1 days);
+        }
+
+        ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
+
+        // User Details
+        assertEq(claimDetails.amount, allocatedAmount);
+        assertEq(claimDetails.claimed, totalClaimed);
+        assertEq(claimDetails.lastClaimed, block.timestamp - 1 days);
+        assertEq(claimDetails.dailyRelease, dailyReleaseAmount);
+        assertEq(claimDetails.claimedAtTGE, false);
+
+        // User Balance
+        assertEq(artTokenContract.balanceOf(claimer1), totalClaimed);
+    }
+
+     function test_should_update_user_balance_after_claim_at_tge_twice_vesting_remainder_post_vesting() public {
+         _setTgeEnabledAt(block.timestamp - 1);
+
+        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ TGE CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+
+        assertTrue(artTokenContract.isTGEActive());
+
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        uint256 expectedTgeReleaseAmount = FixedPointMathLib.mulWadDown(allocatedAmount, 0.25e18);
+        uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, expectedTgeReleaseAmount);
+
+        vm.startPrank(address(claimer1));
+
+        artTokenContract.claim(allocatedAmount, merkleProof);
+
+        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ VESTING CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+
+        // Ensure we are in the vesting window.
+        (, uint256 tgeEnd, uint256 vestingEnd ) = artTokenContract.claimingPeriods();
+        vm.warp(tgeEnd + 1 days);
+
+
+        for(uint256 i; i < 2; i++){
+            artTokenContract.claim(allocatedAmount, merkleProof);
+            vm.warp(block.timestamp + 1 days);
+        }
+
+
+        ArtToken.Claim memory claimDetailsVesting = artTokenContract.claimDetailsByAccount(claimer1);
+        uint256 vestingRelease = claimDetailsVesting.dailyRelease;
+
+        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ POST VESTING CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+
+        vm.warp(vestingEnd);
+
+        uint256 postVestingReleaseTotal = allocatedAmount - claimDetailsVesting.claimed;
+
+        artTokenContract.claim(allocatedAmount, merkleProof);
+
+        ArtToken.Claim memory claimDetailsPostVesting = artTokenContract.claimDetailsByAccount(claimer1);
+
+        uint256 totalTokensClaimed = expectedTgeReleaseAmount + vestingRelease + vestingRelease + postVestingReleaseTotal;
+
+        // User Details
+        assertEq(claimDetailsPostVesting.amount, allocatedAmount);
+        assertEq(claimDetailsPostVesting.claimed, totalTokensClaimed);
+        assertEq(claimDetailsPostVesting.lastClaimed, block.timestamp);
+        assertEq(claimDetailsPostVesting.dailyRelease, dailyReleaseAmount);
+        assertEq(claimDetailsPostVesting.claimedAtTGE, true);
+
+        // assert the tokens were claimed
+        assertEq(artTokenContract.balanceOf(claimer1), totalTokensClaimed);
+    }
+
+    function test_should_update_user_claim_details_after_vesting_claim_only() public {
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+        (,,uint256 vestingEnd) = artTokenContract.claimingPeriods();
+
+        // Set the TGE enabled at to a time in the past
+        _setTgeEnabledAt(block.timestamp - 1);
+
+        // warp to end of vesting period
+        vm.warp(block.timestamp + vestingEnd);
+
+        // claim the tokens
+        vm.startPrank(claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        vm.stopPrank();
+
+        ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
+
+        // User Details
+        assertEq(claimDetails.amount, allocatedAmount);
+        assertEq(claimDetails.claimed, allocatedAmount);
+        assertEq(claimDetails.lastClaimed, block.timestamp);
+        assertEq(claimDetails.dailyRelease, 0);
+        assertEq(claimDetails.claimedAtTGE, false);
+
+        // assert the tokens were claimed
+        assertEq(artTokenContract.balanceOf(claimer1), allocatedAmount);
+    }
 
     function test_should_update_totalUsersClaimed_after_claim() public {
          _setTgeEnabledAt(block.timestamp - 1);
@@ -181,7 +331,7 @@ contract ArtToken_Claim is ContractUnderTest {
         vm.startPrank(address(claimer1));
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
         assertEq(artTokenContract.totalUsersClaimed(), 1);
     }
 }
