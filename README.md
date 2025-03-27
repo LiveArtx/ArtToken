@@ -20,7 +20,8 @@ This is the smart contract for the ArtToken. It is a upgradeable contract that u
 │   ├─ ArtToken.sol — "Standard non-upgradeable ArtToken contract"
 │   ├─ ArtTokenUpgradeable.sol — "Upgradeable ArtToken contract"
 │   ├─ archive/ — "Archived contract versions"
-│   └─ libraries/ — "Shared libraries"
+│   ├─ interfaces/ — "IArtToken.sol"
+│   └─ libraries/ — "FixedPointMathLib.sol"
 ├─ deploy/ — "Deployment scripts"
 ├─ test/ — "Test files"
 ├─ tasks/ — "Hardhat tasks"
@@ -52,10 +53,7 @@ The project uses Foundry as the primary testing framework. To run tests:
 
 ```bash
 # Run Foundry tests
-yarn test
-
-# For verbose output
-forge test -vv
+forge test  --rpc-url https://base-mainnet.g.alchemy.com/v2/<ALCHEMY_KEY> --via-ir
 
 # Generate coverage report
 In terminal run `export ALCHEMY_URL=""`
@@ -138,5 +136,5 @@ const tx = await oftContract.send(
 
 ## UI for Sending Tokens
 
-A simple UI for sending tokens between chains is available in `index.html`. You can also use the [Send Tokens](https://codepen.io/passandscore-the-sasster/full/emYVwWz) interface.
+A simple UI for sending tokens between chains is available in `index.html`. You can also use the [Send Tokens](https://layer-zero-token-transfer.vercel.app/) interface.
 
