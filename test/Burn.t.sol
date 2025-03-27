@@ -11,24 +11,36 @@ contract ArtToken_Initializer is ContractUnderTest {
 
     function test_should_reduce_user_supply_when_burning_tokens() public {
         _mintTokens(user1, 10 ether);
+
         assertEq(artTokenContract.balanceOf(user1), 10 ether);
+        assertEq(artTokenContractUpgradeable.balanceOf(user1), 10 ether);
 
         vm.startPrank(user1);
+
         artTokenContract.burn(5 ether);
+        artTokenContractUpgradeable.burn(5 ether);
+
         assertEq(artTokenContract.balanceOf(user1), 5 ether);
+        assertEq(artTokenContractUpgradeable.balanceOf(user1), 5 ether);
     }
 
     function test_should_allow_burning_of_tokens_from_approved_user() public {
         _mintTokens(user1, 10 ether);
+
         assertEq(artTokenContract.balanceOf(user1), 10 ether);
+        assertEq(artTokenContractUpgradeable.balanceOf(user1), 10 ether);
 
         vm.startPrank(user1);
         artTokenContract.approve(user2, 5 ether);
+        artTokenContractUpgradeable.approve(user2, 5 ether);
         vm.stopPrank();
 
         vm.startPrank(user2);
         artTokenContract.burnFrom(user1, 5 ether);
+        artTokenContractUpgradeable.burnFrom(user1, 5 ether);
+
         assertEq(artTokenContract.balanceOf(user1), 5 ether);
+        assertEq(artTokenContractUpgradeable.balanceOf(user1), 5 ether);
     }
 
     function test_should_reduce_the_cap_after_burning_tokens() public {
@@ -38,7 +50,9 @@ contract ArtToken_Initializer is ContractUnderTest {
 
         vm.startPrank(user1);
         artTokenContract.burn(5 ether);
-
+        artTokenContractUpgradeable.burn(5 ether);
+        
         assertEq(artTokenContract.cap(), initialCapSupply - 5 ether);
+        assertEq(artTokenContractUpgradeable.cap(), initialCapSupply - 5 ether);
     }
 }

@@ -17,7 +17,7 @@ This is the smart contract for the ArtToken. It is a upgradeable contract that u
 
 ```
 ├─ contracts/
-│   ├─ ArtTokenNonUpgradeable.sol — "Standard non-upgradeable ArtToken contract"
+│   ├─ ArtToken.sol — "Standard non-upgradeable ArtToken contract"
 │   ├─ ArtTokenUpgradeable.sol — "Upgradeable ArtToken contract"
 │   ├─ archive/ — "Archived contract versions"
 │   └─ libraries/ — "Shared libraries"
@@ -58,6 +58,7 @@ yarn test
 forge test -vv
 
 # Generate coverage report
+In terminal run `export ALCHEMY_URL=""`
 yarn coverage:build
 
 # View coverage report in browser

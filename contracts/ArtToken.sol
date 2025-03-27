@@ -2,42 +2,38 @@
 pragma solidity 0.8.26;
 
 import "./ArtTokenCore.sol";
-import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
+import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /**
- * @title ArtTokenUpgradeable
- * @dev An upgraded token contract with features like minting, burning, claiming, 
- *      and integration with LayerZero for cross-chain functionality. 
- *      Inherits from multiple open-source and upgradeable smart contracts.
+ * @title ArtToken
+ * @dev This contract represents the Art Token with capabilities for minting, claiming, and burning tokens,
+ *      as well as LayerZero interoperability for cross-chain functionality.
  */
-contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgradeable, ERC20PermitUpgradeable, Ownable2StepUpgradeable {
-    
+contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
     /**
-     * @dev Constructor to initialize the contract with LayerZero endpoint address.
-     * @param _lzEndpoint Address of the LayerZero endpoint to be used for cross-chain functionality.
+     * @dev Constructor to initialize the ArtToken contract
+     * @param _name The name of the token
+     * @param _symbol The symbol of the token
+     * @param _lzEndpoint The LayerZero endpoint address
+     * @param _delegate The address of the delegate for the owner role
+     * @param initialMintAmount The initial mint amount
      */
-    constructor(address _lzEndpoint) OFTUpgradeable(_lzEndpoint) {
-        _disableInitializers();
-    }
-
-    /**
-     * @dev Initializer for setting up the token's name, symbol, owner delegate, and initial mint amount.
-     * @param _name Name of the token.
-     * @param _symbol Symbol for the token.
-     * @param _delegate Address of the owner delegate.
-     * @param initialMintAmount The initial amount to mint to the delegate.
-     */
-    function initialize(string memory _name, string memory _symbol, address _delegate, uint256 initialMintAmount)
-        public
-        initializer
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CONSTRUCTOR ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _lzEndpoint,
+        address _delegate,
+        uint256 initialMintAmount
+    ) 
+      OFT(_name, _symbol, _lzEndpoint, _delegate) 
+      ERC20Capped(MAX_SUPPLY) 
+      ERC20Permit(_name) 
+      Ownable(_delegate) 
     {
-        __OFT_init(_name, _symbol, _delegate);
-        __Ownable_init(_delegate);
-        __ERC20Capped_init(MAX_SUPPLY);
-        __ERC20Permit_init(_name);
         if (initialMintAmount > 0) {
             _mint(_delegate, initialMintAmount * 10 ** decimals());
         }
@@ -47,16 +43,16 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
 
     /**
      * @dev Allows the owner to mint tokens to a specified address.
-     * @param to The address to mint tokens to.
-     * @param amount The amount of tokens to mint.
+     * @param to The address to mint tokens to
+     * @param amount The amount of tokens to mint
      */
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
     /**
-     * @dev Sets the claimable supply of tokens, ensuring it doesn't exceed the cap.
-     * @param amount The new claimable supply amount.
+     * @dev Sets the claimable supply. Only callable by the owner.
+     * @param amount The new claimable supply amount
      */
     function setClaimableSupply(uint256 amount) public onlyOwner {
         require(totalSupply() + amount <= cap(), "Claimable supply exceeds cap");
@@ -65,8 +61,8 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     }
 
     /**
-     * @dev Sets the Merkle root for claim verification.
-     * @param root The Merkle root for claim verification.
+     * @dev Sets the Merkle root. Only callable by the owner.
+     * @param root The new Merkle root to be set
      */
     function setMerkleRoot(bytes32 root) external onlyOwner {
         merkleRoot = root;
@@ -74,7 +70,7 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
 
     /**
      * @dev Sets the timestamp for when TGE (Token Generation Event) is enabled.
-     * @param _tgeEnabledAt The new TGE enabled timestamp in seconds.
+     * @param _tgeEnabledAt The new TGE enabled timestamp in seconds
      */
     function setTgeEnabledAt(uint256 _tgeEnabledAt) external onlyOwner {
         require(totalUsersClaimed == 0, "TGE already enabled");
@@ -82,8 +78,8 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     }
 
     /**
-     * @dev Sets the address of the staking contract for claiming tokens.
-     * @param _stakingContract The address of the staking contract.
+     * @dev Sets the address of the staking contract. Only callable by the owner.
+     * @param _stakingContract The address of the staking contract
      */
     function setStakingContractAddress(address _stakingContract) external onlyOwner {
         require(_stakingContract != address(0), "Invalid staking contract address");
@@ -91,8 +87,8 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     }
 
     /**
-     * @dev Sets the start time for the Token Generation Event (TGE).
-     * @param _startTime The new start time for TGE.
+     * @dev Sets the TGE start time. Only callable by the owner.
+     * @param _startTime The new start time for TGE
      */
     function setTgeStartTime(uint256 _startTime) public onlyOwner {
         require(totalUsersClaimed == 0, "TGE already started");
@@ -100,8 +96,8 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     }
 
     /**
-     * @dev Sets the percentage of tokens to be claimed during TGE.
-     * @param _percentage The percentage of tokens to claim (1-100).
+     * @dev Sets the percentage of tokens to be claimed during TGE. Only callable by the owner.
+     * @param _percentage The percentage of tokens to claim (1-100)
      */
     function setTgeClaimPercentage(uint256 _percentage) public onlyOwner {
         require(totalUsersClaimed == 0, "TGE already enabled");
@@ -109,13 +105,13 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         tgeClaimPercentage = _percentage;
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
-     * @dev Allows eligible users to claim their allocated tokens. 
-     *      Verifies eligibility using Merkle proof and processes the claim based on the TGE.
-     * @param allocatedAmount The total number of tokens allocated to the user.
-     * @param merkleProof The Merkle proof array for verifying user eligibility.
+     * @dev Allows eligible users to claim their allocated tokens. Verifies eligibility using Merkle proof
+     *      and processes the claim based on the current TGE or vesting period.
+     * @param allocatedAmount The total number of tokens allocated to the user
+     * @param merkleProof The Merkle proof array for verifying user eligibility
      */
     function claim(uint256 allocatedAmount, bytes32[] calldata merkleProof) public {
         require(tgeEnabledAt != 0, "TGE not enabled");
@@ -125,6 +121,7 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
 
         assert((claims[_msgSender()].claimed + releaseAmount) <= allocatedAmount);
 
+        // Update total users claimed if the user has not claimed yet
         if (claims[_msgSender()].claimed == 0) {
             claims[_msgSender()].amount = allocatedAmount;
             totalUsersClaimed++;
@@ -135,9 +132,9 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
 
     /**
      * @dev Allows the staking contract to claim tokens on behalf of a user.
-     * @param allocatedAmount The total number of tokens allocated to the user.
-     * @param merkleProof The Merkle proof array for verifying user eligibility.
-     * @param receiver The address receiving the claimed tokens.
+     * @param allocatedAmount The total number of tokens allocated to the user
+     * @param merkleProof The Merkle proof array for verifying user eligibility
+     * @param receiver The address receiving the claimed tokens
      */
     function claimFor(uint256 allocatedAmount, bytes32[] calldata merkleProof, address receiver)
         external
@@ -146,6 +143,7 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         require(stakingContractAddress != address(0), "Staking contract not set");
         require(_msgSender() == stakingContractAddress, "Invalid staking contract address");
 
+        // Create leaf node with total allocation amount using the receiver's address
         bytes32 leaf = keccak256(abi.encodePacked(receiver, allocatedAmount));
 
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
@@ -157,11 +155,11 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         _processClaim(receiver, allocatedAmount);
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ BURN FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ BURN FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
-     * @dev Burns tokens from the caller's account.
-     * @param amount The amount of tokens to burn.
+     * @dev Burns tokens from the caller's account
+     * @param amount The amount of tokens to burn
      */
     function burn(uint256 amount) public virtual {
         _burn(_msgSender(), amount);
@@ -169,9 +167,9 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     }
 
     /**
-     * @dev Burns tokens from a specified account.
-     * @param account The address from which to burn tokens.
-     * @param amount The amount of tokens to burn.
+     * @dev Burns tokens from a specified account
+     * @param account The address from which to burn tokens
+     * @param amount The amount of tokens to burn
      */
     function burnFrom(address account, uint256 amount) public virtual {
         _spendAllowance(account, _msgSender(), amount);
@@ -179,12 +177,12 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         totalBurned += amount;
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ INTERNAL FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ INTERNAL FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
      * @dev Processes the user's claim and transfers the tokens.
-     * @param claimer The address of the user claiming tokens.
-     * @param releaseAmount The number of tokens to release.
+     * @param claimer The address of the user claiming tokens
+     * @param releaseAmount The number of tokens to release
      */
     function _processClaim(address claimer, uint256 releaseAmount) private {
         Claim storage userClaim = claims[claimer];
@@ -203,32 +201,32 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         emit TokensClaimed(claimer, releaseAmount);
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
      * @dev Overrides the ERC20 _update function to add custom behavior for capped token transfers.
      */
-    function _update(address from, address to, uint256 value) internal virtual override(ERC20Upgradeable, ERC20CappedUpgradeable) {
+    function _update(address from, address to, uint256 value) internal virtual override(ERC20, ERC20Capped) {
         super._update(from, to, value);
     }
 
     /**
      * @dev Overrides the transferOwnership function to transfer ownership using Ownable2Step.
      */
-    function transferOwnership(address newOwner) public virtual override(OwnableUpgradeable, Ownable2StepUpgradeable) onlyOwner {
-        Ownable2StepUpgradeable.transferOwnership(newOwner);
+    function transferOwnership(address newOwner) public virtual override(Ownable, Ownable2Step) onlyOwner {
+        Ownable2Step.transferOwnership(newOwner);
     }
 
     /**
      * @dev Internal override of transferOwnership to handle the actual ownership transfer.
      */
-    function _transferOwnership(address newOwner) internal virtual override(OwnableUpgradeable, Ownable2StepUpgradeable) {
-        Ownable2StepUpgradeable._transferOwnership(newOwner);
+    function _transferOwnership(address newOwner) internal virtual override(Ownable, Ownable2Step) {
+        Ownable2Step._transferOwnership(newOwner);
     }
 
     /**
      * @dev Returns the decimals used by the token. Overridden from ERC20.
-     * @return The number of decimals for the token.
+     * @return The number of decimals for the token
      */
     function decimals() public pure override returns (uint8) {
         return DECIMALS;
@@ -236,9 +234,9 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
 
     /**
      * @dev Returns the cap of the token. Overridden from ERC20Capped.
-     * @return The maximum supply of tokens, excluding burned tokens.
+     * @return The maximum supply of tokens, excluding burned tokens
      */
-    function cap() public view virtual override(ERC20CappedUpgradeable) returns (uint256) {
+    function cap() public view virtual override(ERC20Capped) returns (uint256) {
         return MAX_SUPPLY - totalBurned;
     }
 }

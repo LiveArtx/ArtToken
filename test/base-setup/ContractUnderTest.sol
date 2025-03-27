@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT UNLICENSED
 pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
+import {ArtToken} from "contracts/ArtToken.sol";
+import {ArtTokenUpgradeable} from "contracts/ArtTokenUpgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "forge-std/Test.sol";
 
 abstract contract ContractUnderTest is Test {
     uint256 public mainnetFork;
     ArtToken internal artTokenContract;
+    ArtTokenUpgradeable internal artTokenContractUpgradeable;
 
     // Contract deployment details
     string name = "ArtToken";
@@ -20,6 +23,7 @@ abstract contract ContractUnderTest is Test {
     address payable unauthorizedUser = payable(makeAddr("unauthorizedUser"));
     address payable claimer1 = payable(makeAddr("claimer1"));
     address payable claimer2 = payable(makeAddr("claimer2"));
+    address public proxyAdmin = makeAddr("proxyAdmin");
 
     // Constants
     uint256 public CLAIM_AMOUNT = 1000 * 10 ** 18;
@@ -33,18 +37,57 @@ abstract contract ContractUnderTest is Test {
         mainnetFork = vm.createFork(mainnet_rpc_url);
 
         vm.startPrank(deployer);
-
-        artTokenContract = new ArtToken(name, symbol, lzEndpoint, deployer, INITIAL_MINT_AMOUNT);
-
-        vm.label({account: address(artTokenContract), newLabel: "ArtToken"});
-
-        // set claimable supply
-        artTokenContract.setClaimableSupply(CLAIM_AMOUNT * 3);
-        artTokenContract.setTgeClaimPercentage(25);
-
+        _deployNonUpgradeableContract();
+        _deployUpgradeableContract();
         vm.stopPrank();
     }
 
+
+    function _deployNonUpgradeableContract() internal {
+        artTokenContract = new ArtToken(name, symbol, lzEndpoint, deployer, INITIAL_MINT_AMOUNT);
+        vm.label({account: address(artTokenContract), newLabel: "ArtToken"});
+
+        artTokenContract.setClaimableSupply(CLAIM_AMOUNT * 3);
+        artTokenContract.setTgeClaimPercentage(25);
+    }
+
+    function _deployUpgradeableContract() internal {
+          artTokenContractUpgradeable = ArtTokenUpgradeable(
+            _deployContractAndProxy(
+                type(ArtTokenUpgradeable).creationCode,
+                abi.encode(lzEndpoint),
+                abi.encodeWithSelector(
+                    ArtTokenUpgradeable.initialize.selector,
+                    "ArtTokenUpgradeable",
+                    "ART_UPGRADEABLE",
+                    deployer,
+                    INITIAL_MINT_AMOUNT
+                )
+            )
+        );
+
+        vm.label({account: address(artTokenContractUpgradeable), newLabel: "ArtTokenUpgradeable"});
+
+        artTokenContractUpgradeable.setClaimableSupply(CLAIM_AMOUNT * 3);
+        artTokenContractUpgradeable.setTgeClaimPercentage(25);
+    }
+
+
+    function _deployContractAndProxy(
+        bytes memory _oappBytecode,
+        bytes memory _constructorArgs,
+        bytes memory _initializeArgs
+    ) internal returns (address addr) {
+        bytes memory bytecode = bytes.concat(abi.encodePacked(_oappBytecode), _constructorArgs);
+        assembly {
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
+            if iszero(extcodesize(addr)) {
+                revert(0, 0)
+            }
+        }
+
+        return address(new TransparentUpgradeableProxy(addr, proxyAdmin, _initializeArgs));
+    }
 
     function _claimerDetails()
         internal
@@ -71,6 +114,7 @@ abstract contract ContractUnderTest is Test {
 
         vm.startPrank(deployer);
         artTokenContract.setMerkleRoot(merkleRoot);
+        artTokenContractUpgradeable.setMerkleRoot(merkleRoot);
         vm.stopPrank();
     }
 
@@ -83,6 +127,7 @@ abstract contract ContractUnderTest is Test {
         // Set the TGE enabled at to a time in the past
         vm.startPrank(deployer);
         artTokenContract.setTgeEnabledAt(block.timestamp - 1);
+        artTokenContractUpgradeable.setTgeEnabledAt(block.timestamp - 1);
         vm.stopPrank();
 
         // warp to end of vesting period
@@ -91,30 +136,35 @@ abstract contract ContractUnderTest is Test {
         // claim the tokens
         vm.startPrank(claimer);
         artTokenContract.claim(allocatedAmount, merkleProof);
+        artTokenContractUpgradeable.claim(allocatedAmount, merkleProof);
         vm.stopPrank();
     }
 
     function _setStakingContract(address _stakingContract) internal {
         vm.startPrank(deployer);
         artTokenContract.setStakingContractAddress(_stakingContract);
+        artTokenContractUpgradeable.setStakingContractAddress(_stakingContract);
         vm.stopPrank();
     }
 
     function _setClaimableSupply(uint256 _amount) internal {
         vm.startPrank(deployer);
         artTokenContract.setClaimableSupply(_amount);
+        artTokenContractUpgradeable.setClaimableSupply(_amount);
         vm.stopPrank();
     }
 
     function _setTgeEnabledAt(uint256 _time) internal {
         vm.startPrank(deployer);
         artTokenContract.setTgeEnabledAt(_time);
+        artTokenContractUpgradeable.setTgeEnabledAt(_time);
         vm.stopPrank();
     }
 
     function _mintTokens(address _to, uint256 _amount) internal {
         vm.startPrank(deployer);
         artTokenContract.mint(_to, _amount);
+        artTokenContractUpgradeable.mint(_to, _amount);
         vm.stopPrank();
     }
 
@@ -125,6 +175,7 @@ abstract contract ContractUnderTest is Test {
     function _setTgeClaimPercentage(uint256 _percentage) internal {
         vm.startPrank(deployer);
         artTokenContract.setTgeClaimPercentage(_percentage);
+        artTokenContractUpgradeable.setTgeClaimPercentage(_percentage);
         vm.stopPrank();
     }
 }

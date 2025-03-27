@@ -12,5 +12,6 @@ contract ArtToken_Getters is ContractUnderTest {
     function test_should_return_claimable_supply() public {
         _setClaimableSupply(100 ether);
         assertEq(artTokenContract.getClaimableSupply(), 100 ether);
+        assertEq(artTokenContractUpgradeable.getClaimableSupply(), 100 ether);
     }
 }

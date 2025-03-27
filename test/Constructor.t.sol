@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT UNLICENSED
 pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
+import {ArtToken} from "contracts/ArtToken.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
 contract ArtToken_Constructor is ContractUnderTest {

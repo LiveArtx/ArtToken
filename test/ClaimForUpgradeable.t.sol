@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT UNLICENSED
 pragma solidity 0.8.26;
 
-import {ArtToken} from "contracts/ArtToken.sol";
+import {ArtTokenUpgradeable} from "contracts/ArtTokenUpgradeable.sol";
 import {StakingMock} from "./mocks/StakingMock.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
@@ -21,7 +21,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
         vm.startPrank(claimer1);
         vm.expectRevert("Staking contract not set");
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
     }
 
     function test_should_revert_when_staking_contract_is_set_invalid() public {
@@ -33,7 +33,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
         vm.startPrank(claimer1);
         vm.expectRevert("Invalid staking contract address");
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
     }
 
     function test_should_revert_when_merkle_root_is_invalid() public {
@@ -44,7 +44,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
         vm.expectRevert("Invalid merkle proof");
-        artTokenContract.claimFor(allocatedAmount, new bytes32[](0), claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, new bytes32[](0), claimer1);
     }
 
     function test_should_revert_when_already_claimed() public {
@@ -57,11 +57,11 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
         // initial claim
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
 
         // perform second claim
         vm.expectRevert("User already claimed");
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
     }
 
     function test_should_revert_when_releaseAmount_exceeds_claimable_supply() public {
@@ -75,7 +75,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
         vm.expectRevert("Insufficient claimable supply");
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
     }
 
     function test_should_update_user_claim_details() public {
@@ -87,9 +87,9 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         vm.startPrank(address(stakingMock));
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
 
-        ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
+        ArtTokenUpgradeable.Claim memory claimDetails = artTokenContractUpgradeable.claimDetailsByAccount(claimer1);
 
         assertEq(claimDetails.amount, allocatedAmount);
         assertEq(claimDetails.claimed, allocatedAmount);
@@ -107,8 +107,8 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         vm.startPrank(address(stakingMock));
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
-        assertEq(artTokenContract.totalUsersClaimed(), 1);
+        artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
+        assertEq(artTokenContractUpgradeable.totalUsersClaimed(), 1);
     }
 
    
