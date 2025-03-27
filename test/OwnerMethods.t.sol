@@ -139,31 +139,61 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
         artTokenContract.setTgeStartTime(startTime);
     }
 
-    // function test_should_transfer_ownership_if_authorized() public {
-    //     address newOwner = user1;
+    function test_should_transfer_ownership_if_authorized() public {
+        address newOwner = user1;
 
-    //     vm.startPrank(deployer);
-    //     artTokenContract.transferOwnership(newOwner);
-    //     vm.stopPrank();
+        vm.startPrank(deployer);
+        artTokenContract.transferOwnership(newOwner);
+        vm.stopPrank();
 
-    //     vm.startPrank(user1);
-    //     artTokenContract.acceptOwnership();
+        vm.startPrank(user1);
+        artTokenContract.acceptOwnership();
         
-    //     assertEq(artTokenContract.owner(), newOwner);
-    // }
+        assertEq(artTokenContract.owner(), newOwner);
+    }
 
-    // function test_should_revert_when_attempting_to_transfer_ownership_when_unauthorized() public {
-    //     vm.startPrank(unauthorizedUser);
+    function test_should_revert_when_attempting_to_transfer_ownership_when_unauthorized() public {
+        vm.startPrank(unauthorizedUser);
         
-    //     vm.expectRevert(
-    //         abi.encodeWithSelector(
-    //             Ownable.OwnableUnauthorizedAccount.selector,
-    //             unauthorizedUser
-    //         )
-    //     );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                unauthorizedUser
+            )
+        );
 
-    //     artTokenContract.transferOwnership(unauthorizedUser);
-    // }
+        artTokenContract.transferOwnership(unauthorizedUser);
+    }
+
+    function test_should_revert_if_setting_tge_claim_percentage_when_tge_already_started() public {
+        _performClaimAfterVestingPeriod(claimer1);
+
+        vm.startPrank(deployer);
+        vm.expectRevert("TGE already enabled");
+        artTokenContract.setTgeClaimPercentage(25);
+    }
+
+     function test_should_set_tge_claim_percentage_when_authorized() public {
+        vm.startPrank(deployer);
+
+        uint256 claimPerentage = artTokenContract.tgeClaimPercentage();
+        assertNotEq(claimPerentage, 50);
+        artTokenContract.setTgeClaimPercentage(50);
+        assertEq(artTokenContract.tgeClaimPercentage(), 50);
+    }
+
+    function test_should_revert_if_attempting_to_set_tge_claim_percentage_when_unauthorized() public {
+        vm.startPrank(unauthorizedUser);
+        
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                unauthorizedUser
+            )
+        );
+
+        artTokenContract.setTgeClaimPercentage(50);
+    }
     
     
         

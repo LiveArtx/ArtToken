@@ -23,8 +23,9 @@ contract ArtToken is Ownable2Step, OFT, ERC20Capped, ERC20Permit {
     uint256 public claimableSupply;
     uint256 public totalBurned;
     uint256 public tgeEnabledAt;
-    address public stakingContractAddress;
     uint256 public totalUsersClaimed;
+    address public stakingContractAddress;
+    uint256 public tgeClaimPercentage;
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ STRUCTS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
     struct Claim {
@@ -98,6 +99,11 @@ contract ArtToken is Ownable2Step, OFT, ERC20Capped, ERC20Permit {
         tgeEnabledAt = _startTime;
     }
 
+    function setTgeClaimPercentage(uint256 _percentage) public onlyOwner() {
+        require(totalUsersClaimed == 0, "TGE already enabled");
+        require(_percentage >= 1 && _percentage <= 100, "Value must be between 1 and 100");
+        tgeClaimPercentage = _percentage;
+    }
 
    
      /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -224,7 +230,7 @@ contract ArtToken is Ownable2Step, OFT, ERC20Capped, ERC20Permit {
         // During TGE period
         if (isTGEActive()) {
             require(!userClaim.claimedAtTGE, "Already claimed TGE amount");
-            uint256 tgeAmount = FixedPointMathLib.mulWadUp(allocatedAmount, 0.25e18);
+            uint256 tgeAmount = FixedPointMathLib.mulWadUp(allocatedAmount, formatToE18(tgeClaimPercentage));
             userClaim.dailyRelease = calculateDailyRelease(allocatedAmount, tgeAmount);
             return tgeAmount;
         }
@@ -255,6 +261,11 @@ contract ArtToken is Ownable2Step, OFT, ERC20Capped, ERC20Permit {
         _mint(claimer, releaseAmount);
         
         emit TokensClaimed(claimer, releaseAmount);
+    }
+
+     function formatToE18(uint256 percentage) private pure returns (uint256) {
+        require(percentage >= 1 && percentage <= 100, "Value must be between 1 and 100");
+        return (percentage * 1e18) / 100;
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */

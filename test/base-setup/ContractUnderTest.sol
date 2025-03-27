@@ -40,6 +40,7 @@ abstract contract ContractUnderTest is Test {
 
         // set claimable supply
         artTokenContract.setClaimableSupply(CLAIM_AMOUNT * 3);
+        artTokenContract.setTgeClaimPercentage(25);
 
         vm.stopPrank();
     }
@@ -117,6 +118,13 @@ abstract contract ContractUnderTest is Test {
         vm.stopPrank();
     }
 
-    
+    function _formatToE18(uint256 _percentage) internal pure returns (uint256) {
+        return (_percentage * 1e18) / 100;
+    }
 
+    function _setTgeClaimPercentage(uint256 _percentage) internal {
+        vm.startPrank(deployer);
+        artTokenContract.setTgeClaimPercentage(_percentage);
+        vm.stopPrank();
+    }
 }

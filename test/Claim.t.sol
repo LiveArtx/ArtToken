@@ -4,6 +4,7 @@ pragma solidity 0.8.26;
 import {ArtToken} from "contracts/ArtTokenNonUpgradeable.sol";
 import {FixedPointMathLib} from "contracts/libraries/FixedPointMathLib.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
+import "forge-std/Console.sol";
 
 contract ArtToken_Claim is ContractUnderTest {
 
@@ -171,8 +172,6 @@ contract ArtToken_Claim is ContractUnderTest {
         assertEq(artTokenContract.balanceOf(claimer1), expectedTgeReleaseAmount + releaseAmount);
     }
 
-    
-
      function test_should_update_user_claim_details_during_vesting_claim_only() public {
          _setTgeEnabledAt(block.timestamp - 1);
 
@@ -241,62 +240,6 @@ contract ArtToken_Claim is ContractUnderTest {
         assertApproxEqAbs(artTokenContract.balanceOf(claimer1), totalClaimed, 100);
     }
 
-     function test_should_update_user_balance_after_claim_at_tge_twice_vesting_remainder_post_vesting() public {
-         _setTgeEnabledAt(block.timestamp - 1);
-
-        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ TGE CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-
-        assertTrue(artTokenContract.isTGEActive());
-
-        uint256 allocatedAmount = CLAIM_AMOUNT;
-        (, bytes32[] memory merkleProof) = _claimerDetails();
-
-        uint256 expectedTgeReleaseAmount = FixedPointMathLib.mulWadDown(allocatedAmount, 0.25e18);
-        uint256 dailyReleaseAmount = artTokenContract.calculateDailyRelease(allocatedAmount, expectedTgeReleaseAmount);
-
-        vm.startPrank(address(claimer1));
-
-        artTokenContract.claim(allocatedAmount, merkleProof);
-
-        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ VESTING CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-
-        // Ensure we are in the vesting window.
-        (, uint256 tgeEnd, uint256 vestingEnd ) = artTokenContract.claimingPeriods();
-        vm.warp(tgeEnd + 1 days);
-
-
-        for(uint256 i; i < 2; i++){
-            artTokenContract.claim(allocatedAmount, merkleProof);
-            vm.warp(block.timestamp + 1 days);
-        }
-
-
-        ArtToken.Claim memory claimDetailsVesting = artTokenContract.claimDetailsByAccount(claimer1);
-        uint256 vestingRelease = claimDetailsVesting.dailyRelease;
-
-        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ POST VESTING CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-
-        vm.warp(vestingEnd);
-
-        uint256 postVestingReleaseTotal = allocatedAmount - claimDetailsVesting.claimed;
-
-        artTokenContract.claim(allocatedAmount, merkleProof);
-
-        ArtToken.Claim memory claimDetailsPostVesting = artTokenContract.claimDetailsByAccount(claimer1);
-
-        uint256 totalTokensClaimed = expectedTgeReleaseAmount + vestingRelease + vestingRelease + postVestingReleaseTotal;
-
-        // User Details
-        assertEq(claimDetailsPostVesting.amount, allocatedAmount);
-        assertEq(claimDetailsPostVesting.claimed, totalTokensClaimed);
-        assertEq(claimDetailsPostVesting.lastClaimed, block.timestamp);
-        assertEq(claimDetailsPostVesting.dailyRelease, dailyReleaseAmount);
-        assertEq(claimDetailsPostVesting.claimedAtTGE, true);
-
-        // assert the tokens were claimed
-        assertEq(artTokenContract.balanceOf(claimer1), totalTokensClaimed);
-    }
-
     function test_should_update_user_claim_details_after_vesting_claim_only() public {
         uint256 allocatedAmount = CLAIM_AMOUNT;
 
@@ -337,5 +280,78 @@ contract ArtToken_Claim is ContractUnderTest {
 
         artTokenContract.claim(allocatedAmount, merkleProof);
         assertEq(artTokenContract.totalUsersClaimed(), 1);
+    }
+
+   function test_should_run_successful_claims_across_all_periods() public {
+        uint256 snapshotId;
+
+        for (uint256 i = 1; i <= 100; i++) {
+            snapshotId = vm.snapshot(); // Take a snapshot before modifying state
+
+            _setTgeClaimPercentage(i);
+            _executeFullCycleClaim(i);
+
+            vm.revertTo(snapshotId); // Revert state to before this iteration
+        }
+    }
+
+    function _executeFullCycleClaim(uint256 _tgeClaimPercentage) internal {
+
+        _setTgeEnabledAt(block.timestamp - 1);
+
+        assertTrue(artTokenContract.isTGEActive());
+
+        uint256 allocatedAmount = CLAIM_AMOUNT; // 1000e18
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        // Debug prints or assertions
+        console.log("TGE Percentage:", _tgeClaimPercentage);
+        console.log("Allocated Amount:", allocatedAmount);
+        
+        // Calculate expected TGE amount step by step
+        uint256 formattedPercentage = _formatToE18(_tgeClaimPercentage);
+        console.log("Formatted Percentage:", formattedPercentage);
+        
+        uint256 expectedTgeReleaseAmount = FixedPointMathLib.mulWadDown(allocatedAmount, formattedPercentage);
+        console.log("Expected TGE Release:", expectedTgeReleaseAmount);
+
+        vm.startPrank(address(claimer1));
+        
+        // TGE Claim
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        
+        ArtToken.Claim memory afterTGE = artTokenContract.claimDetailsByAccount(claimer1);
+        assertEq(afterTGE.claimed, expectedTgeReleaseAmount, "TGE claim amount incorrect");
+
+        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ VESTING CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+        (, uint256 tgeEnd, uint256 vestingEnd ) = artTokenContract.claimingPeriods();
+        vm.warp(tgeEnd + 1 days);
+
+        // Calculate remaining amount after TGE
+        uint256 remainingAmount = allocatedAmount - expectedTgeReleaseAmount;
+        
+        // Only do vesting claims if there's remaining amount
+        if (remainingAmount > 0) {
+            // Do two vesting period claims
+            for(uint256 i; i < 2; i++){
+                artTokenContract.claim(allocatedAmount, merkleProof);
+                vm.warp(block.timestamp + 1 days);
+            }
+        }
+
+        /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ POST VESTING CLAIM ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+        // Jump to vesting end
+        vm.warp(vestingEnd);
+        
+        // Final claim
+        artTokenContract.claim(allocatedAmount, merkleProof);
+
+        ArtToken.Claim memory finalClaim = artTokenContract.claimDetailsByAccount(claimer1);
+        
+        // Final assertions
+        assertEq(finalClaim.amount, allocatedAmount, "Final allocated amount incorrect");
+        assertEq(finalClaim.claimed, allocatedAmount, "Final claimed amount should equal total allocation");
+        assertEq(finalClaim.claimedAtTGE, true, "Should be marked as TGE claimed");
+        assertEq(artTokenContract.balanceOf(claimer1), allocatedAmount, "Final balance should equal total allocation");
     }
 }
