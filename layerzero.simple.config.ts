@@ -13,12 +13,12 @@ import { OAppEnforcedOption, OmniPointHardhat } from '@layerzerolabs/toolbox-har
 
 const lineaContract: OmniPointHardhat = {
     eid: EndpointId.LINEASEP_V2_TESTNET,
-    contractName: 'ArtTokenOFT_Proxy',
+    contractName: 'ArtTokenUpgradeable',
 }
 
 const baseContract: OmniPointHardhat = {
     eid: EndpointId.BASESEP_V2_TESTNET,
-    contractName: 'ArtTokenOFT_Proxy',
+    contractName: 'ArtTokenUpgradeable',
 }
 
 const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [

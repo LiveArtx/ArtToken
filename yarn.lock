@@ -171,17 +171,17 @@
     kuler "^2.0.0"
 
 "@emnapi/core@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/@emnapi/core/-/core-1.3.1.tgz#9c62d185372d1bddc94682b87f376e03dfac3f16"
-  integrity sha512-pVGjBIt1Y6gg3EJN8jTcfpP/+uuRksIo055oE/OBkDNcjZqVbfkWCksG1Jp4yZnj3iKWyWX8fdG/j6UDYPbFog==
+  version "1.4.0"
+  resolved "https://registry.npmjs.org/@emnapi/core/-/core-1.4.0.tgz#8844b02d799198158ac1fea21ae2bc81b881da9a"
+  integrity sha512-H+N/FqT07NmLmt6OFFtDfwe8PNygprzBikrEMyQfgqSmT0vzE515Pz7R8izwB9q/zsH/MA64AKoul3sA6/CzVg==
   dependencies:
     "@emnapi/wasi-threads" "1.0.1"
     tslib "^2.4.0"
 
 "@emnapi/runtime@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.3.1.tgz#0fcaa575afc31f455fd33534c19381cfce6c6f60"
-  integrity sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw==
+  version "1.4.0"
+  resolved "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.4.0.tgz#8f509bf1059a5551c8fe829a1c4e91db35fdfbee"
+  integrity sha512-64WYIf4UYcdLnbKn/umDlNjQDSS8AgZrI/R9+x5ilkUVFxXcA1Ebl+gQLc/6mERA4407Xof0R7wEyEuj091CVw==
   dependencies:
     tslib "^2.4.0"
 
@@ -718,10 +718,10 @@
     eslint-plugin-unused-imports "^3.2.0"
     prettier "^3.2.4"
 
-"@layerzerolabs/evm-sdks-core@^3.0.82":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/evm-sdks-core/-/evm-sdks-core-3.0.82.tgz#237d243db751c0ad2aca6bc1d2e8807e1afd99ad"
-  integrity sha512-rQJTK9sVklvp+hrbNGONVapvCGKOnykz52d1tlv7DoalWSF6lgpOaYVWuxP/gGYpbBifBPzO+J4kXmZIaGylog==
+"@layerzerolabs/evm-sdks-core@^3.0.83":
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/evm-sdks-core/-/evm-sdks-core-3.0.83.tgz#c8c12c1e87e7c0ac07a41338d59fa1640e1e9a18"
+  integrity sha512-gI8okWJuBULE+S9ZGf92Jl1yPCoeU5Z2GU4WMYL2SkS7jUYtp6ROZf6uM9xjMGW+H3ADQfz7iLTyeh22HmYHmw==
   dependencies:
     ethers "^5.7.2"
 
@@ -744,49 +744,49 @@
     winston "^3.11.0"
 
 "@layerzerolabs/lz-definitions@^3.0.59", "@layerzerolabs/lz-definitions@^3.0.75":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-definitions/-/lz-definitions-3.0.82.tgz#bcca5ba81e06762d03b83b5f097eee3fd488cd47"
-  integrity sha512-Mx+jbGnsr5yrmI7Ag1jsaPqdGf/cagkvWgfia/zgWUUN2YzkVnA9P+rWclMXMg7ECK531yXcZrWhUQVLSiIRVw==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-definitions/-/lz-definitions-3.0.83.tgz#e860f68270d2f89daccf7078675457193f96d823"
+  integrity sha512-ge2wEfM3Wi872BocSBBj+MXmzipfiM1fj8gnUSlPZcnE2d8xSYgeE2VGaIDwd+iJoZYy9dqdHHfesJiWGCoowA==
   dependencies:
     tiny-invariant "^1.3.1"
 
 "@layerzerolabs/lz-evm-messagelib-v2@^3.0.12":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-3.0.82.tgz#d748251d6717631a1c9ddc95db64d2710e90bd77"
-  integrity sha512-FfoNl1CvYbgPN2lHDZuoMkLBP+N7xng8+9K7KIKq6xI2s5zVkPBi+vh0rQqfNQD+vuRQwCYwPamoC7cuL8GVtg==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-3.0.83.tgz#4f8570b8c05e87f3b551513dbf5cbf344957968a"
+  integrity sha512-H7lxnP6mQGsFXXVBMbC1SLE+85MZaLpv4PTfVg3utzFvxuy7d9EpjIBOxB4/RW4DFIO0MTYnncJO/736JfodOQ==
 
 "@layerzerolabs/lz-evm-protocol-v2@^3.0.12":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-3.0.82.tgz#e09ae1c058fd965772d13893133f100a6d5177ad"
-  integrity sha512-6q3ubkxTqYPDjBBhcKf3CJ9vRdRUqrYNol7OzyHl8Mquh0xR/95xoPhG4Rf15kq8VGJdNFlTnIVp1Ie214Xu4w==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-3.0.83.tgz#70c4a1c16791d36e8370d2f0759a740a49299b0b"
+  integrity sha512-PXC2BiMudtoxkgr01+6J9ew5W9sMoOFoPL6bLWc+6yR41aUf22Dpv/8MGkp7pXKwzqqOzQcVfIVsZbPL/XhSAg==
 
 "@layerzerolabs/lz-evm-sdk-v1@^3.0.75":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v1/-/lz-evm-sdk-v1-3.0.82.tgz#4b75b6560057f3796fc2c052284703649fcbb815"
-  integrity sha512-Nbx7ngrmThZt2osQPxJnIOyEhEBpxwEWTAVPvyqzKvsTbMX0oY7I9S4P/A4IdURjvJusrBaZaUoCfZNc2ifkyg==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v1/-/lz-evm-sdk-v1-3.0.83.tgz#0f1252532f4c835e9bdec2458afa4237f1c35a03"
+  integrity sha512-tCbZpang78WfQvOrGA6m7E7pLnGJCV6og87W0zTmLKg2nrJhEWxinnA7cvVvmkL2srYhdPVFVSwp/Jm2zNWmGw==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/providers" "^5.7.0"
-    "@layerzerolabs/evm-sdks-core" "^3.0.82"
+    "@layerzerolabs/evm-sdks-core" "^3.0.83"
     ethers "^5.7.2"
 
 "@layerzerolabs/lz-evm-sdk-v2@^3.0.75":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v2/-/lz-evm-sdk-v2-3.0.82.tgz#c297fecbb729c91ef452b47750a7fe3a7325d57c"
-  integrity sha512-MbKSNxgeQhDAmJSkUfDSa99sjnzFqmrq1oyCeUZva1z3DJGbbBSa4jJidxmThVSt/hNkijXq4vYy91DFYBI1rQ==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v2/-/lz-evm-sdk-v2-3.0.83.tgz#82ad799b9d4a5ad72f63bf19ccb945f6221c3e5e"
+  integrity sha512-7hpJEJfNcU7tK+JhphmobJiZtyjkfX3kvhjAH3jXX8abxH/lSzmfYUhjs1gM/dZBpJ0bO8KikWh2JNrtpPDBrg==
   dependencies:
-    "@layerzerolabs/evm-sdks-core" "^3.0.82"
+    "@layerzerolabs/evm-sdks-core" "^3.0.83"
     ethers "^5.7.2"
 
 "@layerzerolabs/lz-evm-v1-0.7@^3.0.12":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-3.0.82.tgz#008c799422e64a6dc966b106c41d7d93d505ccc1"
-  integrity sha512-V4qm25JGbNakgeXDhDKuTu/qE6apAHZysrtbAq+CffRFZkdof/O1v+mGGIuMxsts1clAiieCHqcZ1fmaklAqsQ==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-3.0.83.tgz#c705aa12e4b094076df4d034ae3f31e32a508e68"
+  integrity sha512-VVSR1FAIpeA5zDmOgsf1h1/2Nlxt4JYXDZa0lRZ4CMhFa8qujouOBIdvvM4Zvf2YwnqRTHTZ8Yb9tOn/saM3Ag==
 
 "@layerzerolabs/lz-v2-utilities@^3.0.12", "@layerzerolabs/lz-v2-utilities@^3.0.75":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-v2-utilities/-/lz-v2-utilities-3.0.82.tgz#d46f8bfe742b34f5d964fb58c943bea72e370f13"
-  integrity sha512-RQS6Lk47H/7BvWjJ9Wgmsar39dXnHMFii0BV2+G9QrNj72VyOwZrmglw6rXnsurF1x1CoJMC1WHwCQuQ5gUX5A==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-v2-utilities/-/lz-v2-utilities-3.0.83.tgz#27f100aaa1b0a08f970cd867bc853adef7c8bc69"
+  integrity sha512-7KcZ8ZXeFSZgJGL+VNRPErJUjEw604U/IlI+ChGu4FOoBhHC7KHsjmN/PO6d92Q+H535J0y4Cs5d0ycINKQPNA==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/address" "^5.7.0"
@@ -848,9 +848,9 @@
   integrity sha512-KIDcVWt6dviKCNY4Pk+o+xa5Hmi1X1qfzZ0vtd/Wa8VB/plYl8h45R2ltXZtFc3tZ8a/CZS6bETVWycmgLX7gA==
 
 "@layerzerolabs/solhint-config@^3.0.12":
-  version "3.0.82"
-  resolved "https://registry.npmjs.org/@layerzerolabs/solhint-config/-/solhint-config-3.0.82.tgz#052ae209452172d4cb287abb8fe43ae819af5162"
-  integrity sha512-wqJ0dISDSd5WJdXpJleJXUG3AZoQa4BgGlRpWgDT2lovn+uxpUsF6Z7MSIwlZDGacQP4WVtTmhgpLvlh5AA87A==
+  version "3.0.83"
+  resolved "https://registry.npmjs.org/@layerzerolabs/solhint-config/-/solhint-config-3.0.83.tgz#ab8c2a1759f6ce08d611c9d32a9f85070eef043f"
+  integrity sha512-DlG1bOnNFRJGY6i32vJ8DUQFbEFT6AofsYiSzmPlwXcHZ9xTwCp+TD0jF/G2XjKKREzgCCjqoMimnHYyX/VrPg==
   dependencies:
     solhint "^4.0.0"
 
@@ -1493,9 +1493,9 @@
   integrity sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==
 
 "@types/node@*":
-  version "22.13.13"
-  resolved "https://registry.npmjs.org/@types/node/-/node-22.13.13.tgz#5e7d110fb509b0d4a43fbf48fa9d6e0f83e1b1e7"
-  integrity sha512-ClsL5nMwKaBRwPcCvH8E7+nU4GxHVx1axNvMZTFHMEfNI7oahimt26P5zjVCRrjiIWj6YFXfE1v3dEp94wLcGQ==
+  version "22.13.14"
+  resolved "https://registry.npmjs.org/@types/node/-/node-22.13.14.tgz#70d84ec91013dcd2ba2de35532a5a14c2b4cc912"
+  integrity sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==
   dependencies:
     undici-types "~6.20.0"
 
@@ -1538,9 +1538,9 @@
     "@types/node" "*"
 
 "@types/semver@^7.3.12":
-  version "7.5.8"
-  resolved "https://registry.npmjs.org/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"
-  integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
+  version "7.7.0"
+  resolved "https://registry.npmjs.org/@types/semver/-/semver-7.7.0.tgz#64c441bdae033b378b6eef7d0c3d77c329b9378e"
+  integrity sha512-k107IF4+Xr7UHjwDc7Cfd6PRQfbdkiRabXGRjo07b4WyPahFBZCZ1sE+BNxYIJPPg73UkfOsVOLwqVc/6ETrIA==
 
 "@types/tinycolor2@^1.4.0":
   version "1.4.6"
@@ -1691,82 +1691,82 @@
   resolved "https://registry.npmjs.org/@ungap/structured-clone/-/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
 
-"@unrs/rspack-resolver-binding-darwin-arm64@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-darwin-arm64/-/rspack-resolver-binding-darwin-arm64-1.3.0.tgz#017b7cbdca0a51b52daa2024fe69f403eae6c268"
-  integrity sha512-EcjI0Hh2HiNOM0B9UuYH1PfLWgE6/SBQ4dKoHXWNloERfveha/n6aUZSBThtPGnJenmdfaJYXXZtqyNbWtJAFw==
+"@unrs/resolver-binding-darwin-arm64@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-darwin-arm64/-/resolver-binding-darwin-arm64-1.3.3.tgz#394065916f98cdc1897cf7234adfdee395725fa8"
+  integrity sha512-EpRILdWr3/xDa/7MoyfO7JuBIJqpBMphtu4+80BK1bRfFcniVT74h3Z7q1+WOc92FuIAYatB1vn9TJR67sORGw==
 
-"@unrs/rspack-resolver-binding-darwin-x64@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-darwin-x64/-/rspack-resolver-binding-darwin-x64-1.3.0.tgz#2ba8b1370d00b240616c44ad9026b8d9bc8d9f36"
-  integrity sha512-3CgG+mhfudDfnaDqwEl0W1mcGTto5f5mqPyJSXcWDxrnNc7pr/p01khIgWOoOD1eCwVejmgpYvRKGBwJPwgHOQ==
+"@unrs/resolver-binding-darwin-x64@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-darwin-x64/-/resolver-binding-darwin-x64-1.3.3.tgz#6a3c75ca984342261c7346db53293b0002e8cde1"
+  integrity sha512-ntj/g7lPyqwinMJWZ+DKHBse8HhVxswGTmNgFKJtdgGub3M3zp5BSZ3bvMP+kBT6dnYJLSVlDqdwOq1P8i0+/g==
 
-"@unrs/rspack-resolver-binding-freebsd-x64@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-freebsd-x64/-/rspack-resolver-binding-freebsd-x64-1.3.0.tgz#552bc4cdbf0f7793d592d2f9f436e0e63279cd91"
-  integrity sha512-ww8BwryDrpXlSajwSIEUXEv8oKDkw04L2ke3hxjaxWohuBV8pAQie9XBS4yQTyREuL2ypcqbARfoCXJJzVp7ig==
+"@unrs/resolver-binding-freebsd-x64@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-freebsd-x64/-/resolver-binding-freebsd-x64-1.3.3.tgz#6532b8d4fecaca6c4424791c82f7a27aac94fcd5"
+  integrity sha512-l6BT8f2CU821EW7U8hSUK8XPq4bmyTlt9Mn4ERrfjJNoCw0/JoHAh9amZZtV3cwC3bwwIat+GUnrcHTG9+qixw==
 
-"@unrs/rspack-resolver-binding-linux-arm-gnueabihf@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-arm-gnueabihf/-/rspack-resolver-binding-linux-arm-gnueabihf-1.3.0.tgz#bada770887e12673c7354cac377eaabd3fb4eb88"
-  integrity sha512-WyhonI1mkuAlnG2iaMjk7uy4aWX+FWi2Au8qCCwj57wVHbAEfrN6xN2YhzbrsCC+ciumKhj5c01MqwsnYDNzWQ==
+"@unrs/resolver-binding-linux-arm-gnueabihf@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm-gnueabihf/-/resolver-binding-linux-arm-gnueabihf-1.3.3.tgz#69a8e430095fcf6a76f7350cc27b83464f8cbb91"
+  integrity sha512-8ScEc5a4y7oE2BonRvzJ+2GSkBaYWyh0/Ko4Q25e/ix6ANpJNhwEPZvCR6GVRmsQAYMIfQvYLdM6YEN+qRjnAQ==
 
-"@unrs/rspack-resolver-binding-linux-arm-musleabihf@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-arm-musleabihf/-/rspack-resolver-binding-linux-arm-musleabihf-1.3.0.tgz#28634d9f3107f9a30a1eeb8733a044e66df3e573"
-  integrity sha512-+uCP6hIAMVWHKQnLZHESJ1U1TFVGLR3FTeaS2A4zB0k8w+IbZlWwl9FiBUOwOiqhcCCyKiUEifgnYFNGpxi3pw==
+"@unrs/resolver-binding-linux-arm-musleabihf@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm-musleabihf/-/resolver-binding-linux-arm-musleabihf-1.3.3.tgz#e1fc8440e54929b1f0f6aff6f6e3e9e19ac4a73c"
+  integrity sha512-8qQ6l1VTzLNd3xb2IEXISOKwMGXDCzY/UNy/7SovFW2Sp0K3YbL7Ao7R18v6SQkLqQlhhqSBIFRk+u6+qu5R5A==
 
-"@unrs/rspack-resolver-binding-linux-arm64-gnu@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-arm64-gnu/-/rspack-resolver-binding-linux-arm64-gnu-1.3.0.tgz#e020eb607fddfc8a1541fbf33993cfd9466bc96b"
-  integrity sha512-p+s/Wp8rf75Qqs2EPw4HC0xVLLW+/60MlVAsB7TYLoeg1e1CU/QCis36FxpziLS0ZY2+wXdTnPUxr+5kkThzwQ==
+"@unrs/resolver-binding-linux-arm64-gnu@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm64-gnu/-/resolver-binding-linux-arm64-gnu-1.3.3.tgz#1249e18b5fa1419addda637d62ef201ce9bcf5a4"
+  integrity sha512-v81R2wjqcWXJlQY23byqYHt9221h4anQ6wwN64oMD/WAE+FmxPHFZee5bhRkNVtzqO/q7wki33VFWlhiADwUeQ==
 
-"@unrs/rspack-resolver-binding-linux-arm64-musl@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-arm64-musl/-/rspack-resolver-binding-linux-arm64-musl-1.3.0.tgz#ea811aeaa9c830cd3b2c6c7e3a8ff34f6b080362"
-  integrity sha512-cZEL9jmZ2kAN53MEk+fFCRJM8pRwOEboDn7sTLjZW+hL6a0/8JNfHP20n8+MBDrhyD34BSF4A6wPCj/LNhtOIQ==
+"@unrs/resolver-binding-linux-arm64-musl@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-arm64-musl/-/resolver-binding-linux-arm64-musl-1.3.3.tgz#9af549ce9dde57b31c32a36cbe9eafa05f96befd"
+  integrity sha512-cAOx/j0u5coMg4oct/BwMzvWJdVciVauUvsd+GQB/1FZYKQZmqPy0EjJzJGbVzFc6gbnfEcSqvQE6gvbGf2N8Q==
 
-"@unrs/rspack-resolver-binding-linux-ppc64-gnu@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-ppc64-gnu/-/rspack-resolver-binding-linux-ppc64-gnu-1.3.0.tgz#413d0c9e754342b99ba0081832b1eb8f4ad8bb21"
-  integrity sha512-IOeRhcMXTNlk2oApsOozYVcOHu4t1EKYKnTz4huzdPyKNPX0Y9C7X8/6rk4aR3Inb5s4oVMT9IVKdgNXLcpGAQ==
+"@unrs/resolver-binding-linux-ppc64-gnu@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-ppc64-gnu/-/resolver-binding-linux-ppc64-gnu-1.3.3.tgz#45aab52319f3e3b2627038a80c0331b0793a4be3"
+  integrity sha512-mq2blqwErgDJD4gtFDlTX/HZ7lNP8YCHYFij2gkXPtMzrXxPW1hOtxL6xg4NWxvnj4bppppb0W3s/buvM55yfg==
 
-"@unrs/rspack-resolver-binding-linux-s390x-gnu@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-s390x-gnu/-/rspack-resolver-binding-linux-s390x-gnu-1.3.0.tgz#8ed2fb1c90c6cd98a2fc4d890acd69bd5fa49acb"
-  integrity sha512-op54XrlEbhgVRCxzF1pHFcLamdOmHDapwrqJ9xYRB7ZjwP/zQCKzz/uAsSaAlyQmbSi/PXV7lwfca4xkv860/Q==
+"@unrs/resolver-binding-linux-s390x-gnu@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-s390x-gnu/-/resolver-binding-linux-s390x-gnu-1.3.3.tgz#7d2fe5c43e291d42e66d74fce07d9cf0050b4241"
+  integrity sha512-u0VRzfFYysarYHnztj2k2xr+eu9rmgoTUUgCCIT37Nr+j0A05Xk2c3RY8Mh5+DhCl2aYibihnaAEJHeR0UOFIQ==
 
-"@unrs/rspack-resolver-binding-linux-x64-gnu@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-x64-gnu/-/rspack-resolver-binding-linux-x64-gnu-1.3.0.tgz#f08990b09323d43e71ca24d860fc7bebbb3ac5b2"
-  integrity sha512-orbQF7sN02N/b9QF8Xp1RBO5YkfI+AYo9VZw0H2Gh4JYWSuiDHjOPEeFPDIRyWmXbQJuiVNSB+e1pZOjPPKIyg==
+"@unrs/resolver-binding-linux-x64-gnu@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-x64-gnu/-/resolver-binding-linux-x64-gnu-1.3.3.tgz#be54ff88c581610c42d8614475c0560f043d7ded"
+  integrity sha512-OrVo5ZsG29kBF0Ug95a2KidS16PqAMmQNozM6InbquOfW/udouk063e25JVLqIBhHLB2WyBnixOQ19tmeC/hIg==
 
-"@unrs/rspack-resolver-binding-linux-x64-musl@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-linux-x64-musl/-/rspack-resolver-binding-linux-x64-musl-1.3.0.tgz#e639d06ac21ea8c84a69328380624a1235acbf7a"
-  integrity sha512-kpjqjIAC9MfsjmlgmgeC8U9gZi6g/HTuCqpI7SBMjsa7/9MvBaQ6TJ7dtnsV/+DXvfJ2+L5teBBXG+XxfpvIFA==
+"@unrs/resolver-binding-linux-x64-musl@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-linux-x64-musl/-/resolver-binding-linux-x64-musl-1.3.3.tgz#4efa7a1e4f7bf231098ed23df1e19174d360c24f"
+  integrity sha512-PYnmrwZ4HMp9SkrOhqPghY/aoL+Rtd4CQbr93GlrRTjK6kDzfMfgz3UH3jt6elrQAfupa1qyr1uXzeVmoEAxUA==
 
-"@unrs/rspack-resolver-binding-wasm32-wasi@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-wasm32-wasi/-/rspack-resolver-binding-wasm32-wasi-1.3.0.tgz#940b371c64958f8bc6f5e0ce674a1c81298a37ac"
-  integrity sha512-JAg0hY3kGsCPk7Jgh16yMTBZ6VEnoNR1DFZxiozjKwH+zSCfuDuM5S15gr50ofbwVw9drobIP2TTHdKZ15MJZQ==
+"@unrs/resolver-binding-wasm32-wasi@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-wasm32-wasi/-/resolver-binding-wasm32-wasi-1.3.3.tgz#6df454b4a9b28d47850bcb665d243f09101b782c"
+  integrity sha512-81AnQY6fShmktQw4hWDUIilsKSdvr/acdJ5azAreu2IWNlaJOKphJSsUVWE+yCk6kBMoQyG9ZHCb/krb5K0PEA==
   dependencies:
     "@napi-rs/wasm-runtime" "^0.2.7"
 
-"@unrs/rspack-resolver-binding-win32-arm64-msvc@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-win32-arm64-msvc/-/rspack-resolver-binding-win32-arm64-msvc-1.3.0.tgz#37f2ad5f03b77084be1095e40184623afe6ec576"
-  integrity sha512-h5N83i407ntS3ndDkhT/3vC3Dj8oP0BIwMtekETNJcxk7IuWccSXifzCEhdxxu/FOX4OICGIHdHrxf5fJuAjfw==
+"@unrs/resolver-binding-win32-arm64-msvc@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-win32-arm64-msvc/-/resolver-binding-win32-arm64-msvc-1.3.3.tgz#fb19e118350e1392993a0a6565b427d38c1c1760"
+  integrity sha512-X/42BMNw7cW6xrB9syuP5RusRnWGoq+IqvJO8IDpp/BZg64J1uuIW6qA/1Cl13Y4LyLXbJVYbYNSKwR/FiHEng==
 
-"@unrs/rspack-resolver-binding-win32-ia32-msvc@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-win32-ia32-msvc/-/rspack-resolver-binding-win32-ia32-msvc-1.3.0.tgz#4da1cdfe102573625c09816c828b95ccdd69ec18"
-  integrity sha512-9QH7Gq3dRL8Q/D6PGS3Dwtjx9yw6kbCEu6iBkAUhFTDAuVUk2L0H/5NekRVA13AQaSc3OsEUKt60EOn/kq5Dug==
+"@unrs/resolver-binding-win32-ia32-msvc@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-win32-ia32-msvc/-/resolver-binding-win32-ia32-msvc-1.3.3.tgz#23a9c4b5621bba2d472bc78fadde7273a8c4548d"
+  integrity sha512-EGNnNGQxMU5aTN7js3ETYvuw882zcO+dsVjs+DwO2j/fRVKth87C8e2GzxW1L3+iWAXMyJhvFBKRavk9Og1Z6A==
 
-"@unrs/rspack-resolver-binding-win32-x64-msvc@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/@unrs/rspack-resolver-binding-win32-x64-msvc/-/rspack-resolver-binding-win32-x64-msvc-1.3.0.tgz#6b075a96023dc15d990196639dc524eb70982973"
-  integrity sha512-IYuXJCuwBOVV0H73l6auaZwtAPHjCPBJkxd4Co0yO6dSjDM5Na5OceaxhUmJLZ3z8kuEGhTYWIHH7PchGztnlg==
+"@unrs/resolver-binding-win32-x64-msvc@1.3.3":
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.3.3.tgz#eee226e5b4c4d91c862248afd24452c8698ed542"
+  integrity sha512-GraLbYqOJcmW1qY3osB+2YIiD62nVf2/bVLHZmrb4t/YSUwE03l7TwcDJl08T/Tm3SVhepX8RQkpzWbag/Sb4w==
 
 abortcontroller-polyfill@^1.7.5:
   version "1.7.8"
@@ -2971,9 +2971,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.5.73:
-  version "1.5.124"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.124.tgz#34b1d6baf8f21d9dbcbae6e67fa276e54554ce81"
-  integrity sha512-riELkpDUqBi00gqreV3RIGoowxGrfueEKBd6zPdOk/I8lvuFpBGNkYoHof3zUHbiTBsIU8oxdIIL/WNrAG1/7A==
+  version "1.5.128"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.128.tgz#8ea537b369c32527b3cc47df7973bffe5d3c2980"
+  integrity sha512-bo1A4HH/NS522Ws0QNFIzyPcyUUNV/yyy70Ho1xqfGYzPUme2F/xr4tlEOuM6/A538U1vDA7a4XfCd1CKRegKQ==
 
 elliptic@6.6.1, elliptic@^6.4.0, elliptic@^6.5.2, elliptic@^6.5.7:
   version "6.6.1"
@@ -3212,17 +3212,17 @@ eslint-import-resolver-node@^0.3.9:
     resolve "^1.22.4"
 
 eslint-import-resolver-typescript@^3.6.1:
-  version "3.9.1"
-  resolved "https://registry.npmjs.org/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.9.1.tgz#0ab8d0ed911e875684a96976a118adee5d1c9daa"
-  integrity sha512-euxa5rTGqHeqVxmOHT25hpk58PxkQ4mNoX6Yun4ooGaCHAxOCojJYNvjmyeOQxj/LyW+3fulH0+xtk+p2kPPTw==
+  version "3.10.0"
+  resolved "https://registry.npmjs.org/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.10.0.tgz#5bca4c579e17174e95bf67526b424d07b46c352e"
+  integrity sha512-aV3/dVsT0/H9BtpNwbaqvl+0xGMRGzncLyhm793NFGvbwGGvzyAykqWZ8oZlZuGwuHkwJjhWJkG1cM3ynvd2pQ==
   dependencies:
     "@nolyfill/is-core-module" "1.0.39"
     debug "^4.4.0"
     get-tsconfig "^4.10.0"
-    is-bun-module "^1.3.0"
-    rspack-resolver "^1.1.0"
+    is-bun-module "^2.0.0"
     stable-hash "^0.0.5"
     tinyglobby "^0.2.12"
+    unrs-resolver "^1.3.2"
 
 eslint-module-utils@^2.12.0:
   version "2.12.0"
@@ -4599,12 +4599,12 @@ is-boolean-object@^1.2.1:
     call-bound "^1.0.3"
     has-tostringtag "^1.0.2"
 
-is-bun-module@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/is-bun-module/-/is-bun-module-1.3.0.tgz#ea4d24fdebfcecc98e81bcbcb506827fee288760"
-  integrity sha512-DgXeu5UWI0IsMQundYb5UAOzm6G2eVnarJ0byP6Tm55iZNKceD59LNPA2L4VvsScTtHcw0yEkVwSf7PC+QoLSA==
+is-bun-module@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/is-bun-module/-/is-bun-module-2.0.0.tgz#4d7859a87c0fcac950c95e666730e745eae8bddd"
+  integrity sha512-gNCGbnnnnFAUGKeZ9PdbyeGYJqewpmc2aKHUEMO5nQPWU9lOmv7jcmQIv+qHD8fXW6W7qfuCwX4rY9LNRjXrkQ==
   dependencies:
-    semver "^7.6.3"
+    semver "^7.7.1"
 
 is-callable@^1.2.7:
   version "1.2.7"
@@ -6124,27 +6124,6 @@ rlp@^2.2.3, rlp@^2.2.4:
   dependencies:
     bn.js "^5.2.0"
 
-rspack-resolver@^1.1.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/rspack-resolver/-/rspack-resolver-1.3.0.tgz#6b8f60182ebc6ff2fd94076afad61bb7d8afccf7"
-  integrity sha512-az/PLDwa1xijNv4bAFBS8mtqqJC1Y3lVyFag4cuyIUOHq/ft5kSZlHbqYaLZLpsQtPWv4ZGDo5ycySKJzUvU/A==
-  optionalDependencies:
-    "@unrs/rspack-resolver-binding-darwin-arm64" "1.3.0"
-    "@unrs/rspack-resolver-binding-darwin-x64" "1.3.0"
-    "@unrs/rspack-resolver-binding-freebsd-x64" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-arm-gnueabihf" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-arm-musleabihf" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-arm64-gnu" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-arm64-musl" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-ppc64-gnu" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-s390x-gnu" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-x64-gnu" "1.3.0"
-    "@unrs/rspack-resolver-binding-linux-x64-musl" "1.3.0"
-    "@unrs/rspack-resolver-binding-wasm32-wasi" "1.3.0"
-    "@unrs/rspack-resolver-binding-win32-arm64-msvc" "1.3.0"
-    "@unrs/rspack-resolver-binding-win32-ia32-msvc" "1.3.0"
-    "@unrs/rspack-resolver-binding-win32-x64-msvc" "1.3.0"
-
 run-parallel@^1.1.9:
   version "1.2.0"
   resolved "https://registry.npmjs.org/run-parallel/-/run-parallel-1.2.0.tgz#66d1368da7bdf921eb9d95bd1a9229e7f21a43ee"
@@ -6239,7 +6218,7 @@ semver@^6.3.0, semver@^6.3.1:
   resolved "https://registry.npmjs.org/semver/-/semver-6.3.1.tgz#556d2ef8689146e46dcea4bfdd095f3434dffcb4"
   integrity sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==
 
-semver@^7.3.7, semver@^7.5.2, semver@^7.5.4, semver@^7.6.0, semver@^7.6.2, semver@^7.6.3:
+semver@^7.3.7, semver@^7.5.2, semver@^7.5.4, semver@^7.6.0, semver@^7.6.2, semver@^7.6.3, semver@^7.7.1:
   version "7.7.1"
   resolved "https://registry.npmjs.org/semver/-/semver-7.7.1.tgz#abd5098d82b18c6c81f6074ff2647fd3e7220c9f"
   integrity sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==
@@ -7061,6 +7040,27 @@ unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
+
+unrs-resolver@^1.3.2:
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/unrs-resolver/-/unrs-resolver-1.3.3.tgz#46bd5dd2ecc650365e050055fc208b5f4ae57803"
+  integrity sha512-PFLAGQzYlyjniXdbmQ3dnGMZJXX5yrl2YS4DLRfR3BhgUsE1zpRIrccp9XMOGRfIHpdFvCn/nr5N1KMVda4x3A==
+  optionalDependencies:
+    "@unrs/resolver-binding-darwin-arm64" "1.3.3"
+    "@unrs/resolver-binding-darwin-x64" "1.3.3"
+    "@unrs/resolver-binding-freebsd-x64" "1.3.3"
+    "@unrs/resolver-binding-linux-arm-gnueabihf" "1.3.3"
+    "@unrs/resolver-binding-linux-arm-musleabihf" "1.3.3"
+    "@unrs/resolver-binding-linux-arm64-gnu" "1.3.3"
+    "@unrs/resolver-binding-linux-arm64-musl" "1.3.3"
+    "@unrs/resolver-binding-linux-ppc64-gnu" "1.3.3"
+    "@unrs/resolver-binding-linux-s390x-gnu" "1.3.3"
+    "@unrs/resolver-binding-linux-x64-gnu" "1.3.3"
+    "@unrs/resolver-binding-linux-x64-musl" "1.3.3"
+    "@unrs/resolver-binding-wasm32-wasi" "1.3.3"
+    "@unrs/resolver-binding-win32-arm64-msvc" "1.3.3"
+    "@unrs/resolver-binding-win32-ia32-msvc" "1.3.3"
+    "@unrs/resolver-binding-win32-x64-msvc" "1.3.3"
 
 update-browserslist-db@^1.1.1:
   version "1.1.3"

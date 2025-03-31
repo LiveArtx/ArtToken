@@ -9,7 +9,7 @@ This is the smart contract for the ArtToken. It is a upgradeable contract that u
 * [Deployed Endpoints, Message Libraries, and Executors](https://docs.layerzero.network/v2/developers/evm/technical-reference/deployed-contracts)
 * [OFT Standard Specification](https://docs.layerzero.network/v2/developers/evm/oft/quickstart)
 * [Options Generator](https://remix.ethereum.org/#url=https://docs.layerzero.network/LayerZero/contracts/OptionsGenerator.sol&lang=en&optimize=false&runs=200&evmVersion=null&version=soljson-v0.8.24+commit.e11b9ed9.js)
-* [LayerZero Scan](https://docs.layerzero.network/v2/developers/evm/technical-reference/layerzero-scan)
+* [LayerZero Scan](https://layerzeroscan.com/)
 * [Deploying Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/deploying)
 * [Configuring Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/configuring-pathways)
 
@@ -68,17 +68,22 @@ Note: While the project includes Hardhat configuration, Foundry is the recommend
 ## Deployment Steps
 
 1. Save a salt in env —> `DETERMINISTIC_SALT=<your salt here>`
-2. Configure `hardhat.config.ts`
-    - [Configuring Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/configuring-pathways)
-3. Deploy contracts:
+2. Compile contracts:
 ```bash
-npx hardhat lz:deploy --stage testnet --tags ArtTokenOFT --reset
+npx hardhat compile
+```
+3. Configure `hardhat.config.ts`
+    - [Configuring Contracts](https://docs.layerzero.network/v2/developers/evm/create-lz-oapp/configuring-pathways)
+4. Deploy contracts:
+```bash
+npx hardhat lz:deploy --stage testnet --tags ArtTokenUpgradeable --reset
 ```
 4. Verify contracts:
 ```bash
 npx hardhat verify <Implementation Contract Address> --network base-testnet <EndpointV2 address - constructor arg>
 ```
 5. Configure `layerzero.simple.config.ts`:
+- update the contractName to the proxy contract name
 ```bash
 npx hardhat lz:oapp:wire --oapp-config layerzero.simple.config.ts
 ```
