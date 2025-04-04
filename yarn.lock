@@ -170,7 +170,7 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@emnapi/core@^1.3.1":
+"@emnapi/core@^1.4.0":
   version "1.4.0"
   resolved "https://registry.npmjs.org/@emnapi/core/-/core-1.4.0.tgz#8844b02d799198158ac1fea21ae2bc81b881da9a"
   integrity sha512-H+N/FqT07NmLmt6OFFtDfwe8PNygprzBikrEMyQfgqSmT0vzE515Pz7R8izwB9q/zsH/MA64AKoul3sA6/CzVg==
@@ -178,7 +178,7 @@
     "@emnapi/wasi-threads" "1.0.1"
     tslib "^2.4.0"
 
-"@emnapi/runtime@^1.3.1":
+"@emnapi/runtime@^1.4.0":
   version "1.4.0"
   resolved "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.4.0.tgz#8f509bf1059a5551c8fe829a1c4e91db35fdfbee"
   integrity sha512-64WYIf4UYcdLnbKn/umDlNjQDSS8AgZrI/R9+x5ilkUVFxXcA1Ebl+gQLc/6mERA4407Xof0R7wEyEuj091CVw==
@@ -718,10 +718,10 @@
     eslint-plugin-unused-imports "^3.2.0"
     prettier "^3.2.4"
 
-"@layerzerolabs/evm-sdks-core@^3.0.83":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/evm-sdks-core/-/evm-sdks-core-3.0.83.tgz#c8c12c1e87e7c0ac07a41338d59fa1640e1e9a18"
-  integrity sha512-gI8okWJuBULE+S9ZGf92Jl1yPCoeU5Z2GU4WMYL2SkS7jUYtp6ROZf6uM9xjMGW+H3ADQfz7iLTyeh22HmYHmw==
+"@layerzerolabs/evm-sdks-core@^3.0.85":
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/evm-sdks-core/-/evm-sdks-core-3.0.85.tgz#768510687dedcc0c6c5ad48be8c1267357bf9701"
+  integrity sha512-sKD0xg75YO1sAqOHoOqsga5L06hTuWmBYZb57l0h5aZ5oi5zmGXPNkoyh0khrx0J4XosbauYoeDw1MsJfcEbIA==
   dependencies:
     ethers "^5.7.2"
 
@@ -744,49 +744,49 @@
     winston "^3.11.0"
 
 "@layerzerolabs/lz-definitions@^3.0.59", "@layerzerolabs/lz-definitions@^3.0.75":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-definitions/-/lz-definitions-3.0.83.tgz#e860f68270d2f89daccf7078675457193f96d823"
-  integrity sha512-ge2wEfM3Wi872BocSBBj+MXmzipfiM1fj8gnUSlPZcnE2d8xSYgeE2VGaIDwd+iJoZYy9dqdHHfesJiWGCoowA==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-definitions/-/lz-definitions-3.0.85.tgz#17192311d3b9e8a3790f4241c670f92cdd04607b"
+  integrity sha512-ocQlXZodxvr7V6QJ0UiYUaKWnfgkSK3rBNkMQPg+JAkMDxxTv5deRp8VwpAzAqDyzdNyywayqQJUS0xlgDQf1Q==
   dependencies:
     tiny-invariant "^1.3.1"
 
 "@layerzerolabs/lz-evm-messagelib-v2@^3.0.12":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-3.0.83.tgz#4f8570b8c05e87f3b551513dbf5cbf344957968a"
-  integrity sha512-H7lxnP6mQGsFXXVBMbC1SLE+85MZaLpv4PTfVg3utzFvxuy7d9EpjIBOxB4/RW4DFIO0MTYnncJO/736JfodOQ==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-3.0.85.tgz#9cd29c1d30d408a6e2a4b150aeb8d15229c38b02"
+  integrity sha512-Hh6M46bo5etrdwjs1kwyiEvZz+Y6g3OFagpy693xb343dqvDZ8ONhNaOL7JC2EE0idTmTNWfr4c7Q7HaVTUsWQ==
 
 "@layerzerolabs/lz-evm-protocol-v2@^3.0.12":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-3.0.83.tgz#70c4a1c16791d36e8370d2f0759a740a49299b0b"
-  integrity sha512-PXC2BiMudtoxkgr01+6J9ew5W9sMoOFoPL6bLWc+6yR41aUf22Dpv/8MGkp7pXKwzqqOzQcVfIVsZbPL/XhSAg==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-3.0.85.tgz#377be93c3bed2e374e0c02b82e3c63f9a027f4bd"
+  integrity sha512-HpBCE48pOYbgSdOD1C68UWIuYmUx+VdDS2R3fu/j0pUGKkTFDbla4OWbg9er/wZAlQnwbiulIhnPq0kP7WNt8g==
 
 "@layerzerolabs/lz-evm-sdk-v1@^3.0.75":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v1/-/lz-evm-sdk-v1-3.0.83.tgz#0f1252532f4c835e9bdec2458afa4237f1c35a03"
-  integrity sha512-tCbZpang78WfQvOrGA6m7E7pLnGJCV6og87W0zTmLKg2nrJhEWxinnA7cvVvmkL2srYhdPVFVSwp/Jm2zNWmGw==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v1/-/lz-evm-sdk-v1-3.0.85.tgz#42cb98cdd64f8f4a19d3c2362ff59e0ad4abbccd"
+  integrity sha512-dgUaPTszNppb6/YIF+n8XURWb2JRaBJTJL0pQq2TN90KFSh6FuYezRX0XUDThS68yiR6nU1T9yoYez44Xv6Lhg==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/providers" "^5.7.0"
-    "@layerzerolabs/evm-sdks-core" "^3.0.83"
+    "@layerzerolabs/evm-sdks-core" "^3.0.85"
     ethers "^5.7.2"
 
 "@layerzerolabs/lz-evm-sdk-v2@^3.0.75":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v2/-/lz-evm-sdk-v2-3.0.83.tgz#82ad799b9d4a5ad72f63bf19ccb945f6221c3e5e"
-  integrity sha512-7hpJEJfNcU7tK+JhphmobJiZtyjkfX3kvhjAH3jXX8abxH/lSzmfYUhjs1gM/dZBpJ0bO8KikWh2JNrtpPDBrg==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-sdk-v2/-/lz-evm-sdk-v2-3.0.85.tgz#5e7b2b7295b852396da1e7cb9d23a075303c562d"
+  integrity sha512-d+w9K2rBLuZw8dxMs6C5NPuetJCkyE3RLOveIqpgY4y4VXxBpArekaHNCqsM695lxVhyif0DQyvhAlh8m8xiCQ==
   dependencies:
-    "@layerzerolabs/evm-sdks-core" "^3.0.83"
+    "@layerzerolabs/evm-sdks-core" "^3.0.85"
     ethers "^5.7.2"
 
 "@layerzerolabs/lz-evm-v1-0.7@^3.0.12":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-3.0.83.tgz#c705aa12e4b094076df4d034ae3f31e32a508e68"
-  integrity sha512-VVSR1FAIpeA5zDmOgsf1h1/2Nlxt4JYXDZa0lRZ4CMhFa8qujouOBIdvvM4Zvf2YwnqRTHTZ8Yb9tOn/saM3Ag==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-3.0.85.tgz#4f8e04c7dbb4c51e28ff32a9de9252ffa120595c"
+  integrity sha512-ZE4Z3i6UQD7KpcwEQsVh7Fz8U0RfF/pEvi/Qm7mbHCoExz8OOAq12h5KQcBuV6dOAxODUKR+YIfzs2BuNsSATQ==
 
 "@layerzerolabs/lz-v2-utilities@^3.0.12", "@layerzerolabs/lz-v2-utilities@^3.0.75":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-v2-utilities/-/lz-v2-utilities-3.0.83.tgz#27f100aaa1b0a08f970cd867bc853adef7c8bc69"
-  integrity sha512-7KcZ8ZXeFSZgJGL+VNRPErJUjEw604U/IlI+ChGu4FOoBhHC7KHsjmN/PO6d92Q+H535J0y4Cs5d0ycINKQPNA==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-v2-utilities/-/lz-v2-utilities-3.0.85.tgz#be131426fffd09509144d81ba285eedd9379eb30"
+  integrity sha512-3j2ewjMxdJlXSNWz/ZQEaLWStbA9LgviCYjhPwb60lN1G8yqcBhOOqwWJmoRcgP/PNokWMaRwEZJHov558ZrFg==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/address" "^5.7.0"
@@ -848,9 +848,9 @@
   integrity sha512-KIDcVWt6dviKCNY4Pk+o+xa5Hmi1X1qfzZ0vtd/Wa8VB/plYl8h45R2ltXZtFc3tZ8a/CZS6bETVWycmgLX7gA==
 
 "@layerzerolabs/solhint-config@^3.0.12":
-  version "3.0.83"
-  resolved "https://registry.npmjs.org/@layerzerolabs/solhint-config/-/solhint-config-3.0.83.tgz#ab8c2a1759f6ce08d611c9d32a9f85070eef043f"
-  integrity sha512-DlG1bOnNFRJGY6i32vJ8DUQFbEFT6AofsYiSzmPlwXcHZ9xTwCp+TD0jF/G2XjKKREzgCCjqoMimnHYyX/VrPg==
+  version "3.0.85"
+  resolved "https://registry.npmjs.org/@layerzerolabs/solhint-config/-/solhint-config-3.0.85.tgz#a2d8265c6fb2bb9e2bc5303fc678598699f84bdc"
+  integrity sha512-n1y4gna5R/14oolDsWHsD5tMA8x+1C+BjnZaZ3az4WFYIONQBQWU/6pIG2sSWxgiIr+uO1qZyqL/QycHb0cgYA==
   dependencies:
     solhint "^4.0.0"
 
@@ -938,12 +938,12 @@
     tweetnacl-util "^0.15.1"
 
 "@napi-rs/wasm-runtime@^0.2.7":
-  version "0.2.7"
-  resolved "https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.7.tgz#288f03812a408bc53c2c3686c65f38fe90f295eb"
-  integrity sha512-5yximcFK5FNompXfJFoWanu5l8v1hNGqNHh9du1xETp9HWk/B/PzvchX55WYOPaIeNglG8++68AAiauBAtbnzw==
+  version "0.2.8"
+  resolved "https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.8.tgz#642e8390ee78ed21d6b79c467aa610e249224ed6"
+  integrity sha512-OBlgKdX7gin7OIq4fadsjpg+cp2ZphvAIKucHsNfTdJiqdOmOEwQd/bHi0VwNrcw5xpBJyUw6cK/QilCqy1BSg==
   dependencies:
-    "@emnapi/core" "^1.3.1"
-    "@emnapi/runtime" "^1.3.1"
+    "@emnapi/core" "^1.4.0"
+    "@emnapi/runtime" "^1.4.0"
     "@tybys/wasm-util" "^0.9.0"
 
 "@noble/curves@1.4.2", "@noble/curves@~1.4.0":
@@ -1493,11 +1493,11 @@
   integrity sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==
 
 "@types/node@*":
-  version "22.13.14"
-  resolved "https://registry.npmjs.org/@types/node/-/node-22.13.14.tgz#70d84ec91013dcd2ba2de35532a5a14c2b4cc912"
-  integrity sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==
+  version "22.14.0"
+  resolved "https://registry.npmjs.org/@types/node/-/node-22.14.0.tgz#d3bfa3936fef0dbacd79ea3eb17d521c628bb47e"
+  integrity sha512-Kmpl+z84ILoG+3T/zQFyAJsU6EPTmOCj8/2+83fSN6djd6I4o7uOuGIH6vq3PrjY5BGitSbFuMN18j3iknubbA==
   dependencies:
-    undici-types "~6.20.0"
+    undici-types "~6.21.0"
 
 "@types/node@^12.12.6":
   version "12.20.55"
@@ -2103,9 +2103,9 @@ bech32@1.1.4:
   integrity sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==
 
 bignumber.js@^9.0.0:
-  version "9.1.2"
-  resolved "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
-  integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
+  version "9.2.0"
+  resolved "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.2.0.tgz#273a03ba2dd44bb29ffff91a1097d9e952d2680d"
+  integrity sha512-JocpCSOixzy5XFJi2ub6IMmV/G9i8Lrm2lZvwBv9xPdglmZM0ufDVBbjbrfU/zuLvBfD7Bv2eYxz9i+OHTgkew==
 
 binary-extensions@^2.0.0:
   version "2.3.0"
@@ -2366,9 +2366,9 @@ camelcase@^6.0.0, camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001524, caniuse-lite@^1.0.30001688:
-  version "1.0.30001707"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001707.tgz#c5e104d199e6f4355a898fcd995a066c7eb9bf41"
-  integrity sha512-3qtRjw/HQSMlDWf+X79N206fepf4SOOU6SQLMaq/0KkZLmSjPxAkBOQQ+FxbHKfHmYLZFfdWsO3KA90ceHPSnw==
+  version "1.0.30001710"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001710.tgz#2cda0c6071ddd43c01151c7f704a0e510a86612f"
+  integrity sha512-B5C0I0UmaGqHgo5FuqJ7hBd4L57A4dDD+Xi+XX1nXOoxGeDdY4Ko38qJYOyqznBVJEqON5p8P1x5zRR3+rsnxA==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -2971,9 +2971,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.5.73:
-  version "1.5.128"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.128.tgz#8ea537b369c32527b3cc47df7973bffe5d3c2980"
-  integrity sha512-bo1A4HH/NS522Ws0QNFIzyPcyUUNV/yyy70Ho1xqfGYzPUme2F/xr4tlEOuM6/A538U1vDA7a4XfCd1CKRegKQ==
+  version "1.5.132"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.132.tgz#081b8086d7cecc58732f7cc1f1c19306c5510c5f"
+  integrity sha512-QgX9EBvWGmvSRa74zqfnG7+Eno0Ak0vftBll0Pt2/z5b3bEGYL6OUXLgKPtvx73dn3dvwrlyVkjPKRRlhLYTEg==
 
 elliptic@6.6.1, elliptic@^6.4.0, elliptic@^6.5.2, elliptic@^6.5.7:
   version "6.6.1"
@@ -3287,12 +3287,12 @@ eslint-plugin-jest-extended@~2.0.0:
     "@typescript-eslint/utils" "^5.10.0"
 
 eslint-plugin-prettier@^5.0.1:
-  version "5.2.5"
-  resolved "https://registry.npmjs.org/eslint-plugin-prettier/-/eslint-plugin-prettier-5.2.5.tgz#0ff00b16f4c80ccdafd6a24a263effba1700087e"
-  integrity sha512-IKKP8R87pJyMl7WWamLgPkloB16dagPIdd2FjBDbyRYPKo93wS/NbCOPh6gH+ieNLC+XZrhJt/kWj0PS/DFdmg==
+  version "5.2.6"
+  resolved "https://registry.npmjs.org/eslint-plugin-prettier/-/eslint-plugin-prettier-5.2.6.tgz#be39e3bb23bb3eeb7e7df0927cdb46e4d7945096"
+  integrity sha512-mUcf7QG2Tjk7H055Jk0lGBjbgDnfrvqjhXh9t2xLMSCjZVcw9Rb1V6sVNXO0th3jgeO7zllWPTNRil3JW94TnQ==
   dependencies:
     prettier-linter-helpers "^1.0.0"
-    synckit "^0.10.2"
+    synckit "^0.11.0"
 
 eslint-plugin-unused-imports@^3.2.0:
   version "3.2.0"
@@ -6688,10 +6688,10 @@ synckit@0.9.2:
     "@pkgr/core" "^0.1.0"
     tslib "^2.6.2"
 
-synckit@^0.10.2:
-  version "0.10.3"
-  resolved "https://registry.npmjs.org/synckit/-/synckit-0.10.3.tgz#940aea2c7b6d141a4f74dbdebc81e0958c331a4b"
-  integrity sha512-R1urvuyiTaWfeCggqEvpDJwAlDVdsT9NM+IP//Tk2x7qHCkSvBk/fwFgw/TLAHzZlrAnnazMcRw0ZD8HlYFTEQ==
+synckit@^0.11.0:
+  version "0.11.2"
+  resolved "https://registry.npmjs.org/synckit/-/synckit-0.11.2.tgz#2a8015ce5df8d5eb0cc47ee55924ad8f8756c24b"
+  integrity sha512-1IUffI8zZ8qUMB3NUJIjk0RpLroG/8NkQDAWH1NbB2iJ0/5pn3M8rxfNzMz4GH9OnYaGYn31LEDSXJp/qIlxgA==
   dependencies:
     "@pkgr/core" "^0.2.0"
     tslib "^2.8.1"
@@ -7014,10 +7014,10 @@ undici-types@~5.26.4:
   resolved "https://registry.npmjs.org/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
-undici-types@~6.20.0:
-  version "6.20.0"
-  resolved "https://registry.npmjs.org/undici-types/-/undici-types-6.20.0.tgz#8171bf22c1f588d1554d55bf204bc624af388433"
-  integrity sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==
+undici-types@~6.21.0:
+  version "6.21.0"
+  resolved "https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
+  integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
 undici@^5.14.0:
   version "5.29.0"

@@ -87,6 +87,7 @@ npx hardhat verify <Implementation Contract Address> --network base-testnet <End
 ```bash
 npx hardhat lz:oapp:wire --oapp-config layerzero.simple.config.ts
 ```
+- if you get an error attempt running `yarn upgrade` to update LayerZero dependencies
 
 ## Manual Configuration (Optional)
 
