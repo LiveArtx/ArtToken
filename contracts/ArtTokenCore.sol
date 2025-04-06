@@ -77,17 +77,24 @@ abstract contract ArtTokenCore is IArtTokenCore {
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ HELPER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
-    /// @dev Calculate how much the user can currently claim
-    /// @param user The address of the user claiming tokens
-    /// @param totalAllocation The total token allocation for the user from Merkle tree
-    /// @param processClaim Whether to process the claim or not
-    /// @return The amount of tokens that can be claimed in the current transaction
+    /// @dev This function calculates how many tokens a user can claim right now
+    /// SIMPLIFIED EXPLANATION:
+    /// This is like a savings account that gradually unlocks your tokens over time:
+    /// 1. Day 1: You get 25% of your tokens immediately
+    /// 2. After 7 days: The remaining 75% starts unlocking gradually over 6 months
+    /// 3. After 180 days: All your tokens are available
+    ///
+    /// Example with 1000 tokens:
+    /// - Immediately: 250 tokens available (25%)
+    /// - Over 173 days: The remaining 750 tokens unlock bit by bit
+    /// - Each day after day 7, about 4.33 tokens become available (750/173, rounded down)
+    /// - At day 180: All 1000 tokens are available (any rounding discrepancy is corrected at the end)
     function _calculateClaimable(address user, uint256 totalAllocation, bool processClaim) internal returns (uint256) {
         // Calculate time passed since vesting started
         uint256 elapsed = block.timestamp - vestingStart;
         uint256 vested = 0;
 
-        // Initial claim: 25% of total allocation is available immediately
+        // Initial 25% cliff allocation
         if (!initialClaimed[user]) {
             vested += (totalAllocation * CLIFF_PERCENTAGE) / 100;
         }
@@ -98,23 +105,12 @@ abstract contract ArtTokenCore is IArtTokenCore {
             // Calculate how much time has passed since the cliff
             uint256 vestingElapsed = elapsed - CLIFF;
             
-            // The vesting schedule has a maximum duration (180 days total, or DURATION constant)
-            // If more time has passed than the vesting duration, we cap it to prevent over-vesting
-            // Example: 
-            // - Total duration is 180 days, cliff is 7 days
-            // - Linear vesting happens over (180 - 7) = 173 days
-            // - If user claims after 200 days, we treat it as if only 173 days passed because:
-            //   1. The vesting schedule is designed to release 100% of tokens by day 180
-            //   2. First 7 days (cliff period) no linear vesting occurs
-            //   3. The remaining 75% of tokens vest linearly over days 7-180 (173 days)
-            //   4. After day 180, users should not receive more tokens than their total allocation
-            //   5. Therefore, we cap the elapsed time to 173 days to ensure exact 100% vesting
+            // Cap vesting at maximum duration (173 days of linear vesting)
             if (vestingElapsed > (DURATION - CLIFF)) {
                 vestingElapsed = DURATION - CLIFF;
             }
 
-            // Calculate remaining 75% using FixedPointMathLib
-            // This is the portion that will vest linearly after the cliff
+            // Calculate remaining 75% that vests linearly after the cliff
             // Example: If totalAllocation = 1000 tokens
             // - Cliff amount (25%) = 250 tokens (instant)
             // - Remaining amount (75%) = 750 tokens (linear)
@@ -126,11 +122,9 @@ abstract contract ArtTokenCore is IArtTokenCore {
             // 1. No precision loss from separate multiplication and division
             // 2. No intermediate overflow even with large numbers
             // 3. Consistent rounding down behavior for partial amounts
-            // 4. Gas efficient computation in a single operation
             uint256 linearVested = FixedPointMathLib.mulDivDown(remaining, vestingElapsed, DURATION - CLIFF);
 
-            // At the end of vesting period, ensure we get exactly the remaining amount
-            // This prevents rounding errors from causing us to fall short of 100%
+            // Ensure exact remaining amount at vesting end
             if (vestingElapsed == DURATION - CLIFF) {
                 linearVested = remaining;
             }
@@ -150,20 +144,31 @@ abstract contract ArtTokenCore is IArtTokenCore {
         uint256 alreadyClaimed = claimedAmount[user];
         uint256 claimable = 0;
 
-        // This condition means:
-        // "If user hasn't claimed their 25% yet AND enough tokens are vested to cover the 25%"
-        if (!initialClaimed[user] && vested >= (totalAllocation * CLIFF_PERCENTAGE) / 100) {
-            if (processClaim) {
-                initialClaimed[user] = true;
-                totalUsersClaimed++;
-            }
+        // Track initial claim status
+        if (!initialClaimed[user] && processClaim) {
+            initialClaimed[user] = true;
+            totalUsersClaimed++;
         }
 
-        // If the user has more vested tokens than what they have already claimed,
-        // calculate the difference as their claimable amount
+        // Check if there are any unclaimed vested tokens available
+        // vested = total tokens that should be available to the user at this moment
+        // alreadyClaimed = total tokens the user has previously withdrawn
+        // Example:
+        //   Total allocation: 1000 tokens
+        //   Currently vested: 400 tokens (25% cliff + some linear vesting)
+        //   Already claimed: 250 tokens (previous withdrawals)
+        //   Therefore claimable = 400 - 250 = 150 tokens
         if (vested > alreadyClaimed) {
+            // Calculate exact number of new tokens available for claiming
+            // This ensures users can only claim the difference between
+            // what's vested and what they've already taken out
             claimable = vested - alreadyClaimed;
         }
+
+        // If vested <= alreadyClaimed, claimable remains 0
+        // This handles cases where:
+        // 1. User has claimed everything available so far
+        // 2. Not enough time has passed for new tokens to vest
 
         return claimable;
     }
