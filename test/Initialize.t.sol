@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import {ArtTokenUpgradeable} from "contracts/ArtTokenUpgradeable.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
 
-contract ArtToken_Initialize is ContractUnderTest {
+contract ArtTokenUpgradeable_Initialize is ContractUnderTest {
 
     function setUp() public virtual override{
         ContractUnderTest.setUp();

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
@@ -53,7 +53,7 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
         assertEq(artTokenContract.claimableSupply(), claimTotal);
     }
 
-    function test_should_revert_when_setting_tge_enabled_at_for_unauthorized_address() public {
+    function test_should_revert_when_setting_vesting_start_time_for_unauthorized_address() public {
         vm.startPrank(unauthorizedUser);
 
         vm.expectRevert(
@@ -63,7 +63,7 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
             )
         );
 
-        artTokenContract.setTgeEnabledAt(block.timestamp);
+        artTokenContract.setVestingStartTime(block.timestamp);
     }
 
     function test_should_perform_successful_mint_when_authorized() public {
@@ -106,26 +106,27 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
         artTokenContract.setStakingContractAddress(address(1));
     }
 
-    
+    function test_should_revert_if_setting_vesting_start_time_once_vesting_has_started() public {
+         uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
 
-    function test_should_revert_if_setting_tge_enabled_when_tge_already_started() public {
-        _performClaimAfterVestingPeriod(claimer1);
+        _setVestingStartTime(block.timestamp);
 
-        vm.startPrank(deployer);
-        uint256 startTime = block.timestamp + 1 days;
-        vm.expectRevert("TGE already started");
-        artTokenContract.setTgeStartTime(startTime);
+        vm.startPrank(claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        
+        vm.expectRevert("Vesting already started");
+       _setVestingStartTime( block.timestamp + 1 days);
     }
 
-     function test_should_set_tge_enabled_when_authorized() public {
-        vm.startPrank(deployer);
+     function test_should_set_vesting_start_time_when_authorized() public {
         uint256 startTime = block.timestamp + 1 days;
-        artTokenContract.setTgeStartTime(startTime);
+       _setVestingStartTime(startTime);
 
-        assertEq(artTokenContract.tgeEnabledAt(), startTime);
+        assertEq(artTokenContract.vestingStart(), startTime);
     }
 
-    function test_should_revert_if_attempting_to_set_tge_enabled_when_unauthorized() public {
+    function test_should_revert_if_attempting_to_set_vesting_start_time_when_unauthorized() public {
         vm.startPrank(unauthorizedUser);
         uint256 startTime = block.timestamp + 1 days;
         
@@ -136,7 +137,7 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
             )
         );
 
-        artTokenContract.setTgeStartTime(startTime);
+        artTokenContract.setVestingStartTime(startTime);
     }
 
     function test_should_transfer_ownership_if_authorized() public {
@@ -163,38 +164,5 @@ contract ArtToken_OwnerMethods is ContractUnderTest {
         );
 
         artTokenContract.transferOwnership(unauthorizedUser);
-    }
-
-    function test_should_revert_if_setting_tge_claim_percentage_when_tge_already_started() public {
-        _performClaimAfterVestingPeriod(claimer1);
-
-        vm.startPrank(deployer);
-        vm.expectRevert("TGE already enabled");
-        artTokenContract.setTgeClaimPercentage(25);
-    }
-
-     function test_should_set_tge_claim_percentage_when_authorized() public {
-        vm.startPrank(deployer);
-
-        uint256 claimPerentage = artTokenContract.tgeClaimPercentage();
-        assertNotEq(claimPerentage, 50);
-        artTokenContract.setTgeClaimPercentage(50);
-        assertEq(artTokenContract.tgeClaimPercentage(), 50);
-    }
-
-    function test_should_revert_if_attempting_to_set_tge_claim_percentage_when_unauthorized() public {
-        vm.startPrank(unauthorizedUser);
-        
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                unauthorizedUser
-            )
-        );
-
-        artTokenContract.setTgeClaimPercentage(50);
-    }
-    
-    
-        
+    }   
 }
