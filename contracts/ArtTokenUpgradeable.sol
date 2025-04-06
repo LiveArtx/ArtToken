@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import "./ArtTokenCore.sol";
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
@@ -73,15 +73,6 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     }
 
     /**
-     * @dev Sets the timestamp for when TGE (Token Generation Event) is enabled.
-     * @param _tgeEnabledAt The new TGE enabled timestamp in seconds.
-     */
-    function setTgeEnabledAt(uint256 _tgeEnabledAt) external onlyOwner {
-        require(totalUsersClaimed == 0, "TGE already enabled");
-        tgeEnabledAt = _tgeEnabledAt;
-    }
-
-    /**
      * @dev Sets the address of the staking contract for claiming tokens.
      * @param _stakingContract The address of the staking contract.
      */
@@ -94,43 +85,30 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
      * @dev Sets the start time for the Token Generation Event (TGE).
      * @param _startTime The new start time for TGE.
      */
-    function setTgeStartTime(uint256 _startTime) public onlyOwner {
-        require(totalUsersClaimed == 0, "TGE already started");
-        tgeEnabledAt = _startTime;
-    }
-
-    /**
-     * @dev Sets the percentage of tokens to be claimed during TGE.
-     * @param _percentage The percentage of tokens to claim (1-100).
-     */
-    function setTgeClaimPercentage(uint256 _percentage) public onlyOwner {
-        require(totalUsersClaimed == 0, "TGE already enabled");
-        require(_percentage >= 1 && _percentage <= 100, "Value must be between 1 and 100");
-        tgeClaimPercentage = _percentage;
+    function setVestingStartTime(uint256 _startTime) public onlyOwner {
+        require(totalUsersClaimed == 0, "Vesting already started");
+        vestingStart = _startTime;
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
-    /**
-     * @dev Allows eligible users to claim their allocated tokens. 
-     *      Verifies eligibility using Merkle proof and processes the claim based on the TGE.
-     * @param allocatedAmount The total number of tokens allocated to the user.
-     * @param merkleProof The Merkle proof array for verifying user eligibility.
-     */
-    function claim(uint256 allocatedAmount, bytes32[] calldata merkleProof) public {
-        require(tgeEnabledAt != 0, "TGE not enabled");
+   /// @notice Allows users to claim their tokens based on vesting and Merkle proof
+    /// @param totalAllocation Total allocated amount (as in the Merkle tree)
+    /// @param merkleProof Merkle proof validating the user's allocation
+    function claim(uint256 totalAllocation, bytes32[] calldata merkleProof) external {
+        require(block.timestamp >= vestingStart, "Vesting has not started");
 
-        verifyMerkleProof(_msgSender(), allocatedAmount, merkleProof);
-        uint256 releaseAmount = calculateReleaseAmount(_msgSender(), allocatedAmount);
+        // Verify Merkle proof
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, totalAllocation));
+        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid Merkle proof");
 
-        assert((claims[_msgSender()].claimed + releaseAmount) <= allocatedAmount);
+        uint256 claimable = _calculateClaimable(msg.sender, totalAllocation, true);
+        require(claimable > 0, "Nothing to claim");
 
-        if (claims[_msgSender()].claimed == 0) {
-            claims[_msgSender()].amount = allocatedAmount;
-            totalUsersClaimed++;
-        }
+        claimedAmount[msg.sender] += claimable;
 
-        _processClaim(_msgSender(), releaseAmount);
+        _mint(msg.sender, claimable);
+        emit TokensClaimed(msg.sender, claimable);
     }
 
     /**
@@ -142,19 +120,22 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
     function claimFor(uint256 allocatedAmount, bytes32[] calldata merkleProof, address receiver)
         external
     {
-        require(tgeEnabledAt != 0, "TGE not enabled");
+        require(block.timestamp >= vestingStart, "Vesting has not started");
         require(stakingContractAddress != address(0), "Staking contract not set");
         require(_msgSender() == stakingContractAddress, "Invalid staking contract address");
 
         bytes32 leaf = keccak256(abi.encodePacked(receiver, allocatedAmount));
 
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
-        require(claims[receiver].claimed == 0, "User already claimed");
+        require(claimedAmount[receiver] == 0, "User already claimed");
 
-        claims[receiver].amount = allocatedAmount;
+        claimedAmount[receiver] = allocatedAmount;
+        initialClaimed[receiver] = true;
+        
         totalUsersClaimed++;
 
-        _processClaim(receiver, allocatedAmount);
+        _mint(receiver, allocatedAmount);
+        emit TokensClaimed(receiver, allocatedAmount);
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ BURN FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -177,30 +158,6 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
         totalBurned += amount;
-    }
-
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ INTERNAL FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-
-    /**
-     * @dev Processes the user's claim and transfers the tokens.
-     * @param claimer The address of the user claiming tokens.
-     * @param releaseAmount The number of tokens to release.
-     */
-    function _processClaim(address claimer, uint256 releaseAmount) private {
-        Claim storage userClaim = claims[claimer];
-        
-        require(releaseAmount <= claimableSupply, "Insufficient claimable supply");
-        
-        if (isTGEActive()) {
-            userClaim.claimedAtTGE = true;
-        }
-
-        userClaim.claimed += releaseAmount;
-        userClaim.lastClaimed = block.timestamp;
-        claimableSupply -= releaseAmount;
-        _mint(claimer, releaseAmount);
-        
-        emit TokensClaimed(claimer, releaseAmount);
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */

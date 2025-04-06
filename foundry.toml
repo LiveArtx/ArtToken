@@ -1,5 +1,5 @@
 [profile.default]
-solc-version = '0.8.26'
+solc-version = '0.8.28'
 src = 'contracts'
 out = 'out'
 cache_path = 'cache/foundry'
@@ -10,6 +10,7 @@ ast = true
 ffi = true
 build_info = true
 extra_output = ["storageLayout"]
+evm.version = 'cancun'
 
 libs = [
     # We provide a set of useful contract utilities

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import {FixedPointMathLib} from "contracts/libraries/FixedPointMathLib.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./interfaces/IArtTokenCore.sol";
 
 /// @title ArtTokenCore - Core logic for ART token vesting and claims
-/// @notice Manages token generation events (TGE), vesting schedules, and claims
+/// @notice Manages claimable tokens with cliff and linear vesting
 /// @dev Uses Merkle proofs for claim verification and fixed-point math for calculations
 abstract contract ArtTokenCore is IArtTokenCore {
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CONSTANTS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -14,11 +14,14 @@ abstract contract ArtTokenCore is IArtTokenCore {
     /// @notice Number of decimal places for the token
     uint8 public constant DECIMALS = 18;
 
-    /// @notice Duration of the Token Generation Event (TGE)
-    uint256 public constant TGE_DURATION = 7 days;
+    /// @notice Duration of the cliff period
+    uint256 public constant CLIFF = 7 days;
 
-    /// @notice Duration of the vesting period after TGE
-    uint256 public constant VESTING_DURATION = 180 days;
+    /// @notice Percentage of the claimable supply that is available immediately
+    uint256 public constant CLIFF_PERCENTAGE = 25;
+
+    /// @notice Duration of the vesting period including the cliff period
+    uint256 public constant DURATION = 180 days;
 
     /// @notice Maximum supply of ART tokens
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * 10 ** DECIMALS;
@@ -28,11 +31,14 @@ abstract contract ArtTokenCore is IArtTokenCore {
     /// @notice Tracks the amount of tokens claimed by each user
     mapping(address => uint256) internal claimedAmount;
 
-    /// @notice Stores claim details for each user
-    mapping(address => Claim) internal claims;
+    /// @notice Stores whether the user has claimed the initial amount
+     mapping(address => bool) internal initialClaimed;
 
     /// @notice Merkle root used for claim verification
     bytes32 public merkleRoot;
+
+    /// @notice Timestamp when vesting starts (including Cliff period)
+    uint256 public vestingStart;
 
     /// @notice Total amount of tokens available for claims
     uint256 public claimableSupply;
@@ -40,18 +46,11 @@ abstract contract ArtTokenCore is IArtTokenCore {
     /// @notice Total amount of tokens burned
     uint256 public totalBurned;
 
-    /// @notice Timestamp when TGE is enabled
-    uint256 public tgeEnabledAt;
-
     /// @notice Number of unique users who have claimed tokens
     uint256 public totalUsersClaimed;
 
     /// @notice Address of the staking contract
     address public stakingContractAddress;
-
-    /// @notice Percentage of tokens claimable at TGE
-    uint256 public tgeClaimPercentage;
-
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ GETTERS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
@@ -61,86 +60,116 @@ abstract contract ArtTokenCore is IArtTokenCore {
         return claimableSupply;
     }
 
-    /// @notice Retrieves claim details for a specific address
-    /// @param account The address of the user
-    /// @return Claim struct containing claim details
-    function claimDetailsByAccount(address account) external view returns (Claim memory) {
-        return claims[account];
+    /// @notice Returns the amount of tokens claimed by a user
+    /// @param user The address of the user
+    /// @return uint256 The amount of tokens claimed
+    function getClaimedAmount(address user) external view returns (uint256) {
+        return claimedAmount[user];
     }
 
-    /// @notice Checks whether the TGE is currently active
-    /// @return bool True if TGE is active, false otherwise
-    function isTGEActive() public view returns (bool) {
-        return tgeEnabledAt > 0 && block.timestamp >= tgeEnabledAt && block.timestamp <= tgeEnabledAt + TGE_DURATION;
-    }
-
-    /// @notice Returns the start and end timestamps for TGE and vesting periods
-    /// @return tgeStart Start time of TGE
-    /// @return tgeEnd End time of TGE
-    /// @return vestingEnd End time of the vesting period
-    function claimingPeriods() public view returns (uint256 tgeStart, uint256 tgeEnd, uint256 vestingEnd) {
-        tgeStart = tgeEnabledAt;
-        tgeEnd = tgeStart + TGE_DURATION;
-        vestingEnd = tgeEnd + VESTING_DURATION;
-    }
-
-    /// @notice Calculates the daily release amount during vesting
-    /// @param _allocatedAmount Total allocated tokens for the user
-    /// @param _claimed Amount already claimed by the user
-    /// @return uint256 Amount that can be claimed per day
-    function calculateDailyRelease(uint256 _allocatedAmount, uint256 _claimed) public pure returns (uint256) {
-        uint256 remaining = _allocatedAmount - _claimed;
-        uint256 vestingCliff = 180; // days
-        return FixedPointMathLib.mulDivDown(remaining, 1e18, uint256(vestingCliff) * 1e18);
+    /// @notice Returns the amount of tokens that can be claimed by a user
+    /// @param user The address of the user
+    /// @param totalAllocation The total token allocation for the user from Merkle tree
+    /// @return uint256 The amount of tokens that can be claimed in the current transaction
+    function getClaimableAmount(address user, uint256 totalAllocation) external returns (uint256) {
+        return _calculateClaimable(user, totalAllocation, false);
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ HELPER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
-    /// @notice Verifies a Merkle proof for a claim
-    /// @param claimer Address of the claimant
-    /// @param allocatedAmount Amount allocated to the claimer
-    /// @param merkleProof Proof verifying the claim
-    function verifyMerkleProof(address claimer, uint256 allocatedAmount, bytes32[] calldata merkleProof) internal view {
-        bytes32 leaf = keccak256(abi.encodePacked(claimer, allocatedAmount));
-        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
-    }
+    /// @dev This function calculates how many tokens a user can claim right now
+    /// SIMPLIFIED EXPLANATION:
+    /// This is like a savings account that gradually unlocks your tokens over time:
+    /// 1. Day 1: You get 25% of your tokens immediately
+    /// 2. After 7 days: The remaining 75% starts unlocking gradually over 6 months
+    /// 3. After 180 days: All your tokens are available
+    ///
+    /// Example with 1000 tokens:
+    /// - Immediately: 250 tokens available (25%)
+    /// - Over 173 days: The remaining 750 tokens unlock bit by bit
+    /// - Each day after day 7, about 4.33 tokens become available (750/173, rounded down)
+    /// - At day 180: All 1000 tokens are available (any rounding discrepancy is corrected at the end)
+    function _calculateClaimable(address user, uint256 totalAllocation, bool processClaim) internal returns (uint256) {
+        // Calculate time passed since vesting started
+        uint256 elapsed = block.timestamp - vestingStart;
+        uint256 vested = 0;
 
-    /// @notice Calculates the claimable amount based on vesting schedules
-    /// @param claimer Address of the claimant
-    /// @param allocatedAmount Total allocated tokens for the user
-    /// @return releaseAmount Amount that can be claimed in the current cycle
-    function calculateReleaseAmount(address claimer, uint256 allocatedAmount) internal returns (uint256 releaseAmount) {
-        Claim storage userClaim = claims[claimer];
-
-        // After vesting period, claim all remaining tokens
-        (,, uint256 vestingEnd) = claimingPeriods();
-        if (block.timestamp >= vestingEnd) {
-            return allocatedAmount - userClaim.claimed;
+        // Initial 25% cliff allocation
+        if (!initialClaimed[user]) {
+            vested += (totalAllocation * CLIFF_PERCENTAGE) / 100;
         }
 
-        // During TGE period
-        if (isTGEActive()) {
-            require(!userClaim.claimedAtTGE, "Already claimed TGE amount");
-            uint256 tgeAmount = FixedPointMathLib.mulWadUp(allocatedAmount, formatToE18(tgeClaimPercentage));
-            userClaim.dailyRelease = calculateDailyRelease(allocatedAmount, tgeAmount);
-            return tgeAmount;
+        // Linear vesting calculation for remaining 75% of tokens
+        // Only starts after the 7-day cliff period
+        if (elapsed > CLIFF) {
+            // Calculate how much time has passed since the cliff
+            uint256 vestingElapsed = elapsed - CLIFF;
+            
+            // Cap vesting at maximum duration (173 days of linear vesting)
+            if (vestingElapsed > (DURATION - CLIFF)) {
+                vestingElapsed = DURATION - CLIFF;
+            }
+
+            // Calculate remaining 75% that vests linearly after the cliff
+            // Example: If totalAllocation = 1000 tokens
+            // - Cliff amount (25%) = 250 tokens (instant)
+            // - Remaining amount (75%) = 750 tokens (linear)
+            uint256 remaining = (totalAllocation * (100 - CLIFF_PERCENTAGE)) / 100;
+
+            // Calculate linear vesting with precise division
+            // mulDivDown performs: (remaining * vestingElapsed) / (DURATION - CLIFF) atomically
+            // This ensures:
+            // 1. No precision loss from separate multiplication and division
+            // 2. No intermediate overflow even with large numbers
+            // 3. Consistent rounding down behavior for partial amounts
+            uint256 linearVested = FixedPointMathLib.mulDivDown(remaining, vestingElapsed, DURATION - CLIFF);
+
+            // Ensure exact remaining amount at vesting end
+            if (vestingElapsed == DURATION - CLIFF) {
+                linearVested = remaining;
+            }
+
+            // For subsequent claims (after initial claim), we need to include both:
+            // 1. The cliff amount (25%)
+            // 2. The linearly vested amount (based on time)
+            // Example at 50% through linear vesting:
+            // - If initialClaimed = true: vested = 25% + (75% * 0.5) = 62.5%
+            // - If initialClaimed = false: vested = 25% + (75% * 0.5) = 62.5% (cliff added above)
+            vested = initialClaimed[user] ? 
+                (totalAllocation * CLIFF_PERCENTAGE) / 100 + linearVested : 
+                vested + linearVested;
         }
 
-        // During vesting period
-        require(userClaim.lastClaimed + 1 days <= block.timestamp, "Claim only once per day");
-        if (userClaim.dailyRelease == 0) {
-            userClaim.dailyRelease = calculateDailyRelease(allocatedAmount, userClaim.claimed);
-            return userClaim.dailyRelease;
-        } else {
-            return userClaim.dailyRelease;
-        }
-    }
+        // Track how much the user has already claimed
+        uint256 alreadyClaimed = claimedAmount[user];
+        uint256 claimable = 0;
 
-    /// @notice Formats a percentage value to a fixed-point 18-decimal representation
-    /// @param percentage The percentage value (1-100)
-    /// @return uint256 The percentage scaled to 18 decimals
-    function formatToE18(uint256 percentage) internal pure returns (uint256) {
-        require(percentage >= 1 && percentage <= 100, "Value must be between 1 and 100");
-        return (percentage * 1e18) / 100;
+        // Track initial claim status
+        if (!initialClaimed[user] && processClaim) {
+            initialClaimed[user] = true;
+            totalUsersClaimed++;
+        }
+
+        // Check if there are any unclaimed vested tokens available
+        // vested = total tokens that should be available to the user at this moment
+        // alreadyClaimed = total tokens the user has previously withdrawn
+        // Example:
+        //   Total allocation: 1000 tokens
+        //   Currently vested: 400 tokens (25% cliff + some linear vesting)
+        //   Already claimed: 250 tokens (previous withdrawals)
+        //   Therefore claimable = 400 - 250 = 150 tokens
+        if (vested > alreadyClaimed) {
+            // Calculate exact number of new tokens available for claiming
+            // This ensures users can only claim the difference between
+            // what's vested and what they've already taken out
+            claimable = vested - alreadyClaimed;
+        }
+
+        // If vested <= alreadyClaimed, claimable remains 0
+        // This handles cases where:
+        // 1. User has claimed everything available so far
+        // 2. Not enough time has passed for new tokens to vest
+
+        return claimable;
     }
 }

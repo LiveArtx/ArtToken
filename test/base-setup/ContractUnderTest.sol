@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import {ArtToken} from "contracts/ArtToken.sol";
 import {ArtTokenUpgradeable} from "contracts/ArtTokenUpgradeable.sol";
@@ -48,7 +48,6 @@ abstract contract ContractUnderTest is Test {
         vm.label({account: address(artTokenContract), newLabel: "ArtToken"});
 
         artTokenContract.setClaimableSupply(CLAIM_AMOUNT * 3);
-        artTokenContract.setTgeClaimPercentage(25);
     }
 
     function _deployUpgradeableContract() internal {
@@ -69,7 +68,6 @@ abstract contract ContractUnderTest is Test {
         vm.label({account: address(artTokenContractUpgradeable), newLabel: "ArtTokenUpgradeable"});
 
         artTokenContractUpgradeable.setClaimableSupply(CLAIM_AMOUNT * 3);
-        artTokenContractUpgradeable.setTgeClaimPercentage(25);
     }
 
 
@@ -118,28 +116,6 @@ abstract contract ContractUnderTest is Test {
         vm.stopPrank();
     }
 
-    function _performClaimAfterVestingPeriod(address claimer) internal {
-        uint256 allocatedAmount = CLAIM_AMOUNT;
-
-        (, bytes32[] memory merkleProof) = _claimerDetails();
-        (,, uint256 vestingEnd) = artTokenContract.claimingPeriods();
-
-        // Set the TGE enabled at to a time in the past
-        vm.startPrank(deployer);
-        artTokenContract.setTgeEnabledAt(block.timestamp - 1);
-        artTokenContractUpgradeable.setTgeEnabledAt(block.timestamp - 1);
-        vm.stopPrank();
-
-        // warp to end of vesting period
-        vm.warp(block.timestamp + vestingEnd);
-
-        // claim the tokens
-        vm.startPrank(claimer);
-        artTokenContract.claim(allocatedAmount, merkleProof);
-        artTokenContractUpgradeable.claim(allocatedAmount, merkleProof);
-        vm.stopPrank();
-    }
-
     function _setStakingContract(address _stakingContract) internal {
         vm.startPrank(deployer);
         artTokenContract.setStakingContractAddress(_stakingContract);
@@ -154,10 +130,10 @@ abstract contract ContractUnderTest is Test {
         vm.stopPrank();
     }
 
-    function _setTgeEnabledAt(uint256 _time) internal {
+    function _setVestingStartTime(uint256 _time) internal {
         vm.startPrank(deployer);
-        artTokenContract.setTgeEnabledAt(_time);
-        artTokenContractUpgradeable.setTgeEnabledAt(_time);
+        artTokenContract.setVestingStartTime(_time);
+        artTokenContractUpgradeable.setVestingStartTime(_time);
         vm.stopPrank();
     }
 
@@ -170,12 +146,5 @@ abstract contract ContractUnderTest is Test {
 
     function _formatToE18(uint256 _percentage) internal pure returns (uint256) {
         return (_percentage * 1e18) / 100;
-    }
-
-    function _setTgeClaimPercentage(uint256 _percentage) internal {
-        vm.startPrank(deployer);
-        artTokenContract.setTgeClaimPercentage(_percentage);
-        artTokenContractUpgradeable.setTgeClaimPercentage(_percentage);
-        vm.stopPrank();
     }
 }

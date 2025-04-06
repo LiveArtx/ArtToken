@@ -49,7 +49,8 @@ const config  = {
     solidity: {
         compilers: [
             {
-                version: '0.8.26',
+                version: '0.8.28',
+                evmVersion: 'cancun',
                 settings: {
                     viaIR: true,
                     optimizer: {

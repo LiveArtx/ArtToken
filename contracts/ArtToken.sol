@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import "./ArtTokenCore.sol";
 import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
@@ -39,20 +39,20 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
         }
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OWNER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OWNER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
      * @dev Allows the owner to mint tokens to a specified address.
-     * @param to The address to mint tokens to
-     * @param amount The amount of tokens to mint
+     * @param to The address to mint tokens to.
+     * @param amount The amount of tokens to mint.
      */
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 
     /**
-     * @dev Sets the claimable supply. Only callable by the owner.
-     * @param amount The new claimable supply amount
+     * @dev Sets the claimable supply of tokens, ensuring it doesn't exceed the cap.
+     * @param amount The new claimable supply amount.
      */
     function setClaimableSupply(uint256 amount) public onlyOwner {
         require(totalSupply() + amount <= cap(), "Claimable supply exceeds cap");
@@ -61,25 +61,16 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
     }
 
     /**
-     * @dev Sets the Merkle root. Only callable by the owner.
-     * @param root The new Merkle root to be set
+     * @dev Sets the Merkle root for claim verification.
+     * @param root The Merkle root for claim verification.
      */
     function setMerkleRoot(bytes32 root) external onlyOwner {
         merkleRoot = root;
     }
 
     /**
-     * @dev Sets the timestamp for when TGE (Token Generation Event) is enabled.
-     * @param _tgeEnabledAt The new TGE enabled timestamp in seconds
-     */
-    function setTgeEnabledAt(uint256 _tgeEnabledAt) external onlyOwner {
-        require(totalUsersClaimed == 0, "TGE already enabled");
-        tgeEnabledAt = _tgeEnabledAt;
-    }
-
-    /**
-     * @dev Sets the address of the staking contract. Only callable by the owner.
-     * @param _stakingContract The address of the staking contract
+     * @dev Sets the address of the staking contract for claiming tokens.
+     * @param _stakingContract The address of the staking contract.
      */
     function setStakingContractAddress(address _stakingContract) external onlyOwner {
         require(_stakingContract != address(0), "Invalid staking contract address");
@@ -87,79 +78,67 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
     }
 
     /**
-     * @dev Sets the TGE start time. Only callable by the owner.
-     * @param _startTime The new start time for TGE
+     * @dev Sets the start time for the Token Generation Event (TGE).
+     * @param _startTime The new start time for TGE.
      */
-    function setTgeStartTime(uint256 _startTime) public onlyOwner {
-        require(totalUsersClaimed == 0, "TGE already started");
-        tgeEnabledAt = _startTime;
+    function setVestingStartTime(uint256 _startTime) public onlyOwner {
+        require(totalUsersClaimed == 0, "Vesting already started");
+        vestingStart = _startTime;
     }
 
-    /**
-     * @dev Sets the percentage of tokens to be claimed during TGE. Only callable by the owner.
-     * @param _percentage The percentage of tokens to claim (1-100)
-     */
-    function setTgeClaimPercentage(uint256 _percentage) public onlyOwner {
-        require(totalUsersClaimed == 0, "TGE already enabled");
-        require(_percentage >= 1 && _percentage <= 100, "Value must be between 1 and 100");
-        tgeClaimPercentage = _percentage;
-    }
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ CLAIM FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+   /// @notice Allows users to claim their tokens based on vesting and Merkle proof
+    /// @param totalAllocation Total allocated amount (as in the Merkle tree)
+    /// @param merkleProof Merkle proof validating the user's allocation
+    function claim(uint256 totalAllocation, bytes32[] calldata merkleProof) external {
+        require(block.timestamp >= vestingStart, "Vesting has not started");
 
-    /**
-     * @dev Allows eligible users to claim their allocated tokens. Verifies eligibility using Merkle proof
-     *      and processes the claim based on the current TGE or vesting period.
-     * @param allocatedAmount The total number of tokens allocated to the user
-     * @param merkleProof The Merkle proof array for verifying user eligibility
-     */
-    function claim(uint256 allocatedAmount, bytes32[] calldata merkleProof) public {
-        require(tgeEnabledAt != 0, "TGE not enabled");
+        // Verify Merkle proof
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, totalAllocation));
+        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid Merkle proof");
 
-        verifyMerkleProof(_msgSender(), allocatedAmount, merkleProof);
-        uint256 releaseAmount = calculateReleaseAmount(_msgSender(), allocatedAmount);
+        uint256 claimable = _calculateClaimable(msg.sender, totalAllocation, true);
+        require(claimable > 0, "Nothing to claim");
 
-        assert((claims[_msgSender()].claimed + releaseAmount) <= allocatedAmount);
+        claimedAmount[msg.sender] += claimable;
 
-        // Update total users claimed if the user has not claimed yet
-        if (claims[_msgSender()].claimed == 0) {
-            claims[_msgSender()].amount = allocatedAmount;
-            totalUsersClaimed++;
-        }
-
-        _processClaim(_msgSender(), releaseAmount);
+        _mint(msg.sender, claimable);
+        emit TokensClaimed(msg.sender, claimable);
     }
 
     /**
      * @dev Allows the staking contract to claim tokens on behalf of a user.
-     * @param allocatedAmount The total number of tokens allocated to the user
-     * @param merkleProof The Merkle proof array for verifying user eligibility
-     * @param receiver The address receiving the claimed tokens
+     * @param allocatedAmount The total number of tokens allocated to the user.
+     * @param merkleProof The Merkle proof array for verifying user eligibility.
+     * @param receiver The address receiving the claimed tokens.
      */
     function claimFor(uint256 allocatedAmount, bytes32[] calldata merkleProof, address receiver)
         external
     {
-        require(tgeEnabledAt != 0, "TGE not enabled");
+        require(block.timestamp >= vestingStart, "Vesting has not started");
         require(stakingContractAddress != address(0), "Staking contract not set");
         require(_msgSender() == stakingContractAddress, "Invalid staking contract address");
 
-        // Create leaf node with total allocation amount using the receiver's address
         bytes32 leaf = keccak256(abi.encodePacked(receiver, allocatedAmount));
 
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
-        require(claims[receiver].claimed == 0, "User already claimed");
+        require(claimedAmount[receiver] == 0, "User already claimed");
 
-        claims[receiver].amount = allocatedAmount;
+        claimedAmount[receiver] = allocatedAmount;
+        initialClaimed[receiver] = true;
+        
         totalUsersClaimed++;
 
-        _processClaim(receiver, allocatedAmount);
+        _mint(receiver, allocatedAmount);
+        emit TokensClaimed(receiver, allocatedAmount);
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ BURN FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ BURN FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
-     * @dev Burns tokens from the caller's account
-     * @param amount The amount of tokens to burn
+     * @dev Burns tokens from the caller's account.
+     * @param amount The amount of tokens to burn.
      */
     function burn(uint256 amount) public virtual {
         _burn(_msgSender(), amount);
@@ -167,9 +146,9 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
     }
 
     /**
-     * @dev Burns tokens from a specified account
-     * @param account The address from which to burn tokens
-     * @param amount The amount of tokens to burn
+     * @dev Burns tokens from a specified account.
+     * @param account The address from which to burn tokens.
+     * @param amount The amount of tokens to burn.
      */
     function burnFrom(address account, uint256 amount) public virtual {
         _spendAllowance(account, _msgSender(), amount);
@@ -177,31 +156,7 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
         totalBurned += amount;
     }
 
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ INTERNAL FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
-
-    /**
-     * @dev Processes the user's claim and transfers the tokens.
-     * @param claimer The address of the user claiming tokens
-     * @param releaseAmount The number of tokens to release
-     */
-    function _processClaim(address claimer, uint256 releaseAmount) private {
-        Claim storage userClaim = claims[claimer];
-        
-        require(releaseAmount <= claimableSupply, "Insufficient claimable supply");
-        
-        if (isTGEActive()) {
-            userClaim.claimedAtTGE = true;
-        }
-
-        userClaim.claimed += releaseAmount;
-        userClaim.lastClaimed = block.timestamp;
-        claimableSupply -= releaseAmount;
-        _mint(claimer, releaseAmount);
-        
-        emit TokensClaimed(claimer, releaseAmount);
-    }
-
-    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
+    /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ OVERRIDES ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
 
     /**
      * @dev Overrides the ERC20 _update function to add custom behavior for capped token transfers.
@@ -226,7 +181,7 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
 
     /**
      * @dev Returns the decimals used by the token. Overridden from ERC20.
-     * @return The number of decimals for the token
+     * @return The number of decimals for the token.
      */
     function decimals() public pure override returns (uint8) {
         return DECIMALS;
@@ -234,7 +189,7 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
 
     /**
      * @dev Returns the cap of the token. Overridden from ERC20Capped.
-     * @return The maximum supply of tokens, excluding burned tokens
+     * @return The maximum supply of tokens, excluding burned tokens.
      */
     function cap() public view virtual override(ERC20Capped) returns (uint256) {
         return MAX_SUPPLY - totalBurned;

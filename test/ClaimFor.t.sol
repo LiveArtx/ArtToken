@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity 0.8.28;
 
 import {ArtToken} from "contracts/ArtToken.sol";
 import {StakingMock} from "./mocks/StakingMock.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
-
+import {IArtTokenCore} from "contracts/interfaces/IArtTokenCore.sol";
 contract ArtToken_ClaimFor is ContractUnderTest {
     StakingMock stakingMock;
 
@@ -17,7 +17,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
          uint256 allocatedAmount = CLAIM_AMOUNT;
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
-        _setTgeEnabledAt(block.timestamp - 1);
+        _setVestingStartTime(block.timestamp - 1);
 
         vm.startPrank(claimer1);
         vm.expectRevert("Staking contract not set");
@@ -26,7 +26,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
     function test_should_revert_when_staking_contract_is_set_invalid() public {
         _setStakingContract(address(stakingMock));
-        _setTgeEnabledAt(block.timestamp - 1);
+        _setVestingStartTime(block.timestamp - 1);
 
          uint256 allocatedAmount = CLAIM_AMOUNT;
         (, bytes32[] memory merkleProof) = _claimerDetails();
@@ -38,7 +38,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
     function test_should_revert_when_merkle_root_is_invalid() public {
         _setStakingContract(address(stakingMock));
-        _setTgeEnabledAt(block.timestamp - 1);
+        _setVestingStartTime(block.timestamp - 1);
 
         vm.startPrank(address(stakingMock));
         uint256 allocatedAmount = CLAIM_AMOUNT;
@@ -48,7 +48,7 @@ contract ArtToken_ClaimFor is ContractUnderTest {
     }
 
     function test_should_revert_when_already_claimed() public {
-        _setTgeEnabledAt(block.timestamp - 1);
+        _setVestingStartTime(block.timestamp - 1);
         _setStakingContract(address(stakingMock));
         
         (, bytes32[] memory merkleProof) = _claimerDetails(); 
@@ -64,43 +64,10 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
     }
 
-    function test_should_revert_when_releaseAmount_exceeds_claimable_supply() public {
-        _setStakingContract(address(stakingMock));
-        _setClaimableSupply(100 wei);
-        _setTgeEnabledAt(block.timestamp - 1);
-
-        (, bytes32[] memory merkleProof) = _claimerDetails();
-
-        vm.startPrank(address(stakingMock));
-        uint256 allocatedAmount = CLAIM_AMOUNT;
-
-        vm.expectRevert("Insufficient claimable supply");
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
-    }
-
-    function test_should_update_user_claim_details() public {
-        _setStakingContract(address(stakingMock));
-        _setTgeEnabledAt(block.timestamp - 1);
-
-        (, bytes32[] memory merkleProof) = _claimerDetails();
-
-        vm.startPrank(address(stakingMock));
-        uint256 allocatedAmount = CLAIM_AMOUNT;
-
-        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
-
-        ArtToken.Claim memory claimDetails = artTokenContract.claimDetailsByAccount(claimer1);
-
-        assertEq(claimDetails.amount, allocatedAmount);
-        assertEq(claimDetails.claimed, allocatedAmount);
-        assertEq(claimDetails.lastClaimed, block.timestamp);
-        assertEq(claimDetails.dailyRelease, 0);
-        assertEq(claimDetails.claimedAtTGE, true);
-    }
 
     function test_should_update_totalUsersClaimed_counter() public {
         _setStakingContract(address(stakingMock));
-        _setTgeEnabledAt(block.timestamp - 1);
+        _setVestingStartTime(block.timestamp - 1);
 
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
@@ -109,6 +76,55 @@ contract ArtToken_ClaimFor is ContractUnderTest {
 
         artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
         assertEq(artTokenContract.totalUsersClaimed(), 1);
+    }
+
+     function test_should_update_claimedAmount_after_claim() public {
+        _setStakingContract(address(stakingMock));
+        _setVestingStartTime(block.timestamp - 1);
+
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+        
+        vm.startPrank(address(stakingMock));
+        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        vm.stopPrank();
+
+        assertEq(artTokenContract.getClaimedAmount(claimer1), allocatedAmount);
+     }
+
+
+    function test_should_emit_TokensClaimed_event() public {
+        _setStakingContract(address(stakingMock));
+        _setVestingStartTime(block.timestamp - 1);
+
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        vm.startPrank(address(stakingMock));
+        
+        vm.expectEmit(true, true, true, true);
+        emit IArtTokenCore.TokensClaimed(claimer1, allocatedAmount);
+        
+        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        vm.stopPrank();
+    }
+
+    function test_should_transfer_tokens_to_beneficiary_not_caller() public {
+        _setStakingContract(address(stakingMock));
+        _setVestingStartTime(block.timestamp - 1);
+
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+        
+        uint256 initialBalance = artTokenContract.balanceOf(claimer1);
+    
+        vm.startPrank(address(stakingMock));
+        artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
+        vm.stopPrank();
+
+        assertEq(artTokenContract.balanceOf(claimer1) - initialBalance, allocatedAmount);
+        assertEq(artTokenContract.balanceOf(address(stakingMock)), 0);
     }
 
    

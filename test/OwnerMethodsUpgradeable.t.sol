@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+// SPDX-License-Identifier: MIT UNLICENSED
+pragma solidity 0.8.28;
 
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ContractUnderTest} from "./base-setup/ContractUnderTest.sol";
-import {ArtToken} from "contracts/ArtToken.sol";
+import {ArtTokenUpgradeable} from "contracts/ArtTokenUpgradeable.sol";
 
-contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
+contract ArtTokenUpgradeable_OwnerMethods is ContractUnderTest {
 
     function setUp() public virtual override{
         ContractUnderTest.setUp();
@@ -16,7 +16,7 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
 
            vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
@@ -38,7 +38,7 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
 
            vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
@@ -53,17 +53,17 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
         assertEq(artTokenContractUpgradeable.claimableSupply(), claimTotal);
     }
 
-    function test_should_revert_when_setting_tge_enabled_at_for_unauthorized_address() public {
+    function test_should_revert_when_setting_vesting_start_time_for_unauthorized_address() public {
         vm.startPrank(unauthorizedUser);
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
 
-        artTokenContractUpgradeable.setTgeEnabledAt(block.timestamp);
+        artTokenContractUpgradeable.setVestingStartTime(block.timestamp);
     }
 
     function test_should_perform_successful_mint_when_authorized() public {
@@ -72,7 +72,7 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
@@ -98,7 +98,7 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
 
          vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
@@ -106,37 +106,41 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
         artTokenContractUpgradeable.setStakingContractAddress(address(1));
     }
 
-    
+    function test_should_revert_if_setting_vesting_start_time_once_vesting_has_started() public {
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
 
-    function test_should_revert_if_setting_tge_enabled_when_tge_already_started() public {
-        _performClaimAfterVestingPeriod(claimer1);
+        _setVestingStartTime(block.timestamp);
 
+        vm.startPrank(claimer1);
+        artTokenContractUpgradeable.claim(allocatedAmount, merkleProof);
+        vm.stopPrank();
+        
         vm.startPrank(deployer);
-        uint256 startTime = block.timestamp + 1 days;
-        vm.expectRevert("TGE already started");
-        artTokenContractUpgradeable.setTgeStartTime(startTime);
+        vm.expectRevert("Vesting already started");
+        artTokenContractUpgradeable.setVestingStartTime(block.timestamp + 1 days);
+        vm.stopPrank();
     }
 
-     function test_should_set_tge_enabled_when_authorized() public {
-        vm.startPrank(deployer);
+     function test_should_set_vesting_start_time_when_authorized() public {
         uint256 startTime = block.timestamp + 1 days;
-        artTokenContractUpgradeable.setTgeStartTime(startTime);
+       _setVestingStartTime(startTime);
 
-        assertEq(artTokenContractUpgradeable.tgeEnabledAt(), startTime);
+        assertEq(artTokenContractUpgradeable.vestingStart(), startTime);
     }
 
-    function test_should_revert_if_attempting_to_set_tge_enabled_when_unauthorized() public {
+    function test_should_revert_if_attempting_to_set_vesting_start_time_when_unauthorized() public {
         vm.startPrank(unauthorizedUser);
         uint256 startTime = block.timestamp + 1 days;
         
         vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
 
-        artTokenContractUpgradeable.setTgeStartTime(startTime);
+        artTokenContractUpgradeable.setVestingStartTime(startTime);
     }
 
     function test_should_transfer_ownership_if_authorized() public {
@@ -157,44 +161,11 @@ contract ArtToken_OwnerMethodsUpgradeable is ContractUnderTest {
         
         vm.expectRevert(
             abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
+                Ownable.OwnableUnauthorizedAccount.selector,
                 unauthorizedUser
             )
         );
 
         artTokenContractUpgradeable.transferOwnership(unauthorizedUser);
-    }
-
-    function test_should_revert_if_setting_tge_claim_percentage_when_tge_already_started() public {
-        _performClaimAfterVestingPeriod(claimer1);
-
-        vm.startPrank(deployer);
-        vm.expectRevert("TGE already enabled");
-        artTokenContractUpgradeable.setTgeClaimPercentage(25);
-    }
-
-     function test_should_set_tge_claim_percentage_when_authorized() public {
-        vm.startPrank(deployer);
-
-        uint256 claimPerentage = artTokenContractUpgradeable.tgeClaimPercentage();
-        assertNotEq(claimPerentage, 50);
-        artTokenContractUpgradeable.setTgeClaimPercentage(50);
-        assertEq(artTokenContractUpgradeable.tgeClaimPercentage(), 50);
-    }
-
-    function test_should_revert_if_attempting_to_set_tge_claim_percentage_when_unauthorized() public {
-        vm.startPrank(unauthorizedUser);
-        
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
-                unauthorizedUser
-            )
-        );
-
-        artTokenContractUpgradeable.setTgeClaimPercentage(50);
-    }
-    
-    
-        
+    }   
 }
