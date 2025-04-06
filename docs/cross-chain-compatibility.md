@@ -27,6 +27,7 @@ npx hardhat lz:deploy --stage testnet --tags ArtTokenUpgradeable --reset
 ```
 
 ### 2. Contract Verification
+- Verify the implementation contract for each chain
 ```bash
 npx hardhat verify <Implementation Contract Address> --network base-testnet <EndpointV2 address>
 ```
@@ -36,6 +37,7 @@ Configure `layerzero.simple.config.ts` with the proxy contract name, then run:
 ```bash
 npx hardhat lz:oapp:wire --oapp-config layerzero.simple.config.ts
 ```
+- *Note: This step may take error when attemoting to sign some of the transactions. Wait a few minutes and try again.*
 
 ### 4. Manual Peer Configuration
 Use the `setPeer` function to configure peer contracts across chains:
