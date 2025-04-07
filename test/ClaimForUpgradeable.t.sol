@@ -21,7 +21,7 @@ contract ArtTokenUpgradeable_ClaimFor is ContractUnderTest {
         _setVestingStartTime(block.timestamp - 1);
 
         vm.startPrank(claimer1);
-        vm.expectRevert("Staking contract not set");
+        vm.expectRevert("Invalid staking contract address");
         artTokenContractUpgradeable.claimFor(allocatedAmount, merkleProof, claimer1);
     }
 

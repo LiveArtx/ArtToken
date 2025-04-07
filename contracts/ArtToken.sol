@@ -117,7 +117,6 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
         external
     {
         require(block.timestamp >= vestingStart, "Vesting has not started");
-        require(stakingContractAddress != address(0), "Staking contract not set");
         require(_msgSender() == stakingContractAddress, "Invalid staking contract address");
 
         bytes32 leaf = keccak256(abi.encodePacked(receiver, allocatedAmount));

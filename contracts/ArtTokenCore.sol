@@ -106,7 +106,7 @@ abstract contract ArtTokenCore is IArtTokenCore {
             uint256 vestingElapsed = elapsed - CLIFF;
             
             // Cap vesting at maximum duration (173 days of linear vesting)
-            if (vestingElapsed > (DURATION - CLIFF)) {
+            if (vestingElapsed >= (DURATION - CLIFF)) {
                 vestingElapsed = DURATION - CLIFF;
             }
 
@@ -124,8 +124,8 @@ abstract contract ArtTokenCore is IArtTokenCore {
             // 3. Consistent rounding down behavior for partial amounts
             uint256 linearVested = FixedPointMathLib.mulDivDown(remaining, vestingElapsed, DURATION - CLIFF);
 
-            // Ensure exact remaining amount at vesting end
-            if (vestingElapsed == DURATION - CLIFF) {
+            // Ensure remaining amount at vesting end
+            if (vestingElapsed >= DURATION - CLIFF) {
                 linearVested = remaining;
             }
 
@@ -158,11 +158,15 @@ abstract contract ArtTokenCore is IArtTokenCore {
         //   Currently vested: 400 tokens (25% cliff + some linear vesting)
         //   Already claimed: 250 tokens (previous withdrawals)
         //   Therefore claimable = 400 - 250 = 150 tokens
-        if (vested > alreadyClaimed) {
+        if (vested > alreadyClaimed && block.timestamp <= vestingStart + DURATION) {
             // Calculate exact number of new tokens available for claiming
             // This ensures users can only claim the difference between
             // what's vested and what they've already taken out
             claimable = vested - alreadyClaimed;
+        } else if (totalAllocation > alreadyClaimed && block.timestamp > vestingStart + DURATION) {
+            // If the user has not claimed all their tokens by the end of the vesting period,
+            // they can claim the remaining tokens
+            claimable = totalAllocation - alreadyClaimed;
         }
 
         // If vested <= alreadyClaimed, claimable remains 0

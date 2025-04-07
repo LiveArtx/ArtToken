@@ -121,7 +121,6 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         external
     {
         require(block.timestamp >= vestingStart, "Vesting has not started");
-        require(stakingContractAddress != address(0), "Staking contract not set");
         require(_msgSender() == stakingContractAddress, "Invalid staking contract address");
 
         bytes32 leaf = keccak256(abi.encodePacked(receiver, allocatedAmount));
