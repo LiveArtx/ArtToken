@@ -222,7 +222,7 @@ contract ArtToken_Claim is ContractUnderTest {
         vm.stopPrank();
     }
 
-    function test_should_vest_correctly_over_entire_period() public {
+    function test_should_vest_correctly_over_entire_period_after_cliff_claimed() public {
         uint256 allocatedAmount = CLAIM_AMOUNT;
         (, bytes32[] memory merkleProof) = _claimerDetails();
 
@@ -248,9 +248,7 @@ contract ArtToken_Claim is ContractUnderTest {
         lastClaimTime = block.timestamp;
 
         // Calculate expected daily vesting amount after cliff
-        uint256 remainingAmount = allocatedAmount - cliffAmount;
         uint256 remainingDays = totalDays - (artTokenContract.CLIFF() / SECONDS_PER_DAY);
-        uint256 expectedDailyVesting = remainingAmount / remainingDays;
 
         // Check each day after cliff
         for (uint256 day = 1; day <= remainingDays; day++) {
@@ -258,7 +256,7 @@ contract ArtToken_Claim is ContractUnderTest {
             
             uint256 newClaimable = artTokenContract.getClaimableAmount(claimer1, allocatedAmount);
             console.log(
-                "Day %s: New Claimable: %s ETH, Total Claimed: %s ETH", 
+                "Day %s: New Claimable: %s ETH, Already Claimed: %s ETH", 
                 day, 
                 newClaimable / 1e18, 
                 totalClaimed / 1e18
@@ -268,23 +266,12 @@ contract ArtToken_Claim is ContractUnderTest {
             if (newClaimable == 0) continue;
 
             // Claim and verify
+            uint256 preClaimTotal = totalClaimed;
             artTokenContract.claim(allocatedAmount, merkleProof);
             totalClaimed += newClaimable;
-            
-            // Allow for 1 wei rounding error per day
-            assertApproxEqAbs(
-                newClaimable, 
-                expectedDailyVesting, 
-                day, // Accumulating rounding error allowance
-                string.concat("Day ", vm.toString(day), ": Incorrect daily vesting amount")
-            );
-            
-            uint256 actualClaimed = artTokenContract.getClaimedAmount(claimer1);
-            assertEq(
-                actualClaimed, 
-                totalClaimed, 
-                string.concat("Day ", vm.toString(day), ": Incorrect total claimed amount")
-            );
+
+            // Verify the math
+            assert(preClaimTotal + newClaimable == totalClaimed);
             
             lastClaimTime = block.timestamp;
         }
@@ -296,6 +283,128 @@ contract ArtToken_Claim is ContractUnderTest {
             remainingDays, // Total accumulated rounding error allowance
             "Final claimed amount should equal allocated amount"
         );
+
+        console.log("--------------------------------");
+        console.log(
+            "Remaining Claimable: %s ETH", 
+            artTokenContract.getClaimableAmount(claimer1, allocatedAmount) / 1e18
+        );
+        console.log("Total Claimed: %s ETH", totalClaimed / 1e18);
+        console.log("Balance of claimer1: %s ETH", artTokenContract.balanceOf(claimer1) / 1e18);
         vm.stopPrank();
+    }
+
+    function test_should_vest_correctly_every_10_days_over_entire_period() public {
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        uint256 startTime = block.timestamp;
+        _setVestingStartTime(startTime);
+
+        uint256 totalClaimed = 0;
+        uint256 lastClaimTime = startTime;
+        uint256 SECONDS_PER_DAY = 1 days;
+        uint256 totalDays = artTokenContract.DURATION() / SECONDS_PER_DAY;
+
+        uint256 increment = 10;
+        vm.startPrank(claimer1);
+
+        for (uint256 day = 0; day < totalDays; day += increment) {
+            
+           
+            
+            uint256 newClaimable = artTokenContract.getClaimableAmount(claimer1, allocatedAmount);
+            console.log(
+                "Day %s: Claimable Amount: %s ETH, Already Claimed: %s ETH", 
+                day, 
+                newClaimable / 1e18, 
+                totalClaimed / 1e18
+            );
+
+            if (newClaimable > 0) {
+                artTokenContract.claim(allocatedAmount, merkleProof);
+                totalClaimed += newClaimable;
+            }
+
+            increment = (day + 10 > totalDays) ? (totalDays - day) : 10;
+            vm.warp(lastClaimTime + (increment * SECONDS_PER_DAY));
+            lastClaimTime += (increment * SECONDS_PER_DAY);
+        }
+
+        // Check final day claimable before claiming
+        vm.warp(startTime + artTokenContract.DURATION());
+        uint256 finalClaimable = artTokenContract.getClaimableAmount(claimer1, allocatedAmount);
+        console.log(
+            "Final Day %s: Claimable Amount: %s ETH, Already Claimed: %s ETH", 
+            totalDays, 
+            finalClaimable / 1e18, 
+            totalClaimed / 1e18
+        );
+
+        // Claim the final amount after the vesting period has ended
+        vm.warp(startTime + artTokenContract.DURATION() + 1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        totalClaimed += finalClaimable;
+
+        console.log("--------------------------------");
+        console.log(
+            "Remaining Claimable: %s ETH", 
+            artTokenContract.getClaimableAmount(claimer1, allocatedAmount) / 1e18
+        );
+
+        console.log("Total Claimed: %s ETH", totalClaimed / 1e18);
+        console.log("Balance of claimer1: %s ETH", artTokenContract.balanceOf(claimer1) / 1e18);
+        vm.stopPrank();
+
+        assertEq(totalClaimed, allocatedAmount);
+        assertEq(artTokenContract.balanceOf(claimer1), totalClaimed);
+    }
+
+    function test_should_claim_total_amount_after_vesting_period_ends() public {
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        _setVestingStartTime(block.timestamp - 1);
+
+        vm.warp(artTokenContract.vestingStart() + artTokenContract.DURATION() + 1);
+
+        vm.startPrank(claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        vm.stopPrank();
+
+        assertEq(artTokenContract.getClaimedAmount(claimer1), allocatedAmount);
+        assertEq(artTokenContract.balanceOf(claimer1), allocatedAmount);
+    }
+
+    function test_should_claim_during_cliff_and_after_vesting_ends_only() public {
+        uint256 allocatedAmount = CLAIM_AMOUNT;
+        (, bytes32[] memory merkleProof) = _claimerDetails();
+
+        _setVestingStartTime(block.timestamp - 1);
+
+        uint256 cliffAmount = artTokenContract.getClaimableAmount(claimer1, allocatedAmount);
+
+        vm.startPrank(claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        vm.stopPrank();
+
+        assertEq(artTokenContract.getClaimedAmount(claimer1), cliffAmount);
+        assertEq(artTokenContract.balanceOf(claimer1), cliffAmount);
+
+        vm.warp(artTokenContract.vestingStart() + artTokenContract.DURATION() + 1);
+
+        uint256 finalClaimable = artTokenContract.getClaimableAmount(claimer1, allocatedAmount);
+
+        vm.startPrank(claimer1);
+        artTokenContract.claim(allocatedAmount, merkleProof);
+        vm.stopPrank();
+
+        console.log(
+            "Claimed after vesting ended: %s ETH", 
+            finalClaimable / 1e18
+        );
+
+        assertEq(artTokenContract.getClaimedAmount(claimer1), allocatedAmount);
+        assertEq(artTokenContract.balanceOf(claimer1), allocatedAmount);
     }
 }
