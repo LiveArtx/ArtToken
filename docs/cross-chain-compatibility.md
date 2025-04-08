@@ -37,7 +37,7 @@ Configure `layerzero.simple.config.ts` with the proxy contract name, then run:
 ```bash
 npx hardhat lz:oapp:wire --oapp-config layerzero.simple.config.ts
 ```
-- *Note: This step may take error when attemoting to sign some of the transactions. Wait a few minutes and try again.*
+- *Note: This step may take error when attempting to sign some of the transactions. Wait a few minutes and try again.*
 
 ### 4. Manual Peer Configuration
 Use the `setPeer` function to configure peer contracts across chains:
