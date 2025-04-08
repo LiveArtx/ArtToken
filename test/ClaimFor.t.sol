@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity 0.8.26;
 
 import {ArtToken} from "contracts/ArtToken.sol";
 import {StakingMock} from "./mocks/StakingMock.sol";
@@ -110,21 +110,18 @@ contract ArtToken_ClaimFor is ContractUnderTest {
         vm.stopPrank();
     }
 
-    function test_should_transfer_tokens_to_beneficiary_not_caller() public {
+    function test_should_transfer_tokens_staking_contract() public {
         _setStakingContract(address(stakingMock));
         _setVestingStartTime(block.timestamp - 1);
 
         uint256 allocatedAmount = CLAIM_AMOUNT;
         (, bytes32[] memory merkleProof) = _claimerDetails();
         
-        uint256 initialBalance = artTokenContract.balanceOf(claimer1);
-    
         vm.startPrank(address(stakingMock));
         artTokenContract.claimFor(allocatedAmount, merkleProof, claimer1);
         vm.stopPrank();
 
-        assertEq(artTokenContract.balanceOf(claimer1) - initialBalance, allocatedAmount);
-        assertEq(artTokenContract.balanceOf(address(stakingMock)), 0);
+        assertEq(artTokenContract.balanceOf(address(stakingMock)), allocatedAmount);
     }
 
    

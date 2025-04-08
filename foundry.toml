@@ -1,5 +1,5 @@
 [profile.default]
-solc-version = '0.8.28'
+solc-version = '0.8.26'
 src = 'contracts'
 out = 'out'
 cache_path = 'cache/foundry'

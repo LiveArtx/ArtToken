@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity 0.8.26;
 
 import "./ArtTokenCore.sol";
 import {OFTUpgradeable} from "@layerzerolabs/oft-evm-upgradeable/contracts/oft/OFTUpgradeable.sol";
@@ -133,7 +133,9 @@ contract ArtTokenUpgradeable is ArtTokenCore, OFTUpgradeable, ERC20CappedUpgrade
         
         totalUsersClaimed++;
 
-        _mint(receiver, allocatedAmount);
+        // Minted to staking contract address as this reduces additional 
+        // steps to approve and transfer the tokens within the staking phase
+        _mint(stakingContractAddress, allocatedAmount);
         emit TokensClaimed(receiver, allocatedAmount);
     }
 

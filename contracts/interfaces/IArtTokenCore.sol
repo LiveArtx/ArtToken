@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+pragma solidity 0.8.26;
 
 import {FixedPointMathLib} from "contracts/libraries/FixedPointMathLib.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity 0.8.26;
 
 import "./ArtTokenCore.sol";
 import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
@@ -129,7 +129,9 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
         
         totalUsersClaimed++;
 
-        _mint(receiver, allocatedAmount);
+        // Minted to staking contract address as this reduces additional 
+        // steps to approve and transfer the tokens within the staking phase
+        _mint(stakingContractAddress, allocatedAmount);
         emit TokensClaimed(receiver, allocatedAmount);
     }
 
