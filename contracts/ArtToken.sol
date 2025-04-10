@@ -98,8 +98,13 @@ contract ArtToken is ArtTokenCore, OFT, ERC20Capped, ERC20Permit, Ownable2Step {
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, totalAllocation));
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid Merkle proof");
 
-        uint256 claimable = _calculateClaimable(msg.sender, totalAllocation, true);
+        (uint256 claimable, bool hasInitialClaimed) = _calculateClaimable(msg.sender, totalAllocation);
         require(claimable > 0, "Nothing to claim");
+
+        if (!hasInitialClaimed) {
+            initialClaimed[msg.sender] = true;
+            totalUsersClaimed++;
+        }
 
         claimedAmount[msg.sender] += claimable;
 

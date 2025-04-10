@@ -39,7 +39,7 @@ npx hardhat lz:oapp:wire --oapp-config layerzero.simple.config.ts
 ```
 - *Note: This step may take error when attempting to sign some of the transactions. Wait a few minutes and try again.*
 
-### 4. Manual Peer Configuration
+### 4. Manual Peer Configuration (if needed)
 Use the `setPeer` function to configure peer contracts across chains:
 
 #### Parameters:

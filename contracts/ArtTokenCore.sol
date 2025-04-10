@@ -71,8 +71,9 @@ abstract contract ArtTokenCore is IArtTokenCore {
     /// @param user The address of the user
     /// @param totalAllocation The total token allocation for the user from Merkle tree
     /// @return uint256 The amount of tokens that can be claimed in the current transaction
-    function getClaimableAmount(address user, uint256 totalAllocation) external returns (uint256) {
-        return _calculateClaimable(user, totalAllocation, false);
+    function getClaimableAmount(address user, uint256 totalAllocation) external view returns (uint256) {
+        (uint256 claimable, ) = _calculateClaimable(user, totalAllocation);
+        return claimable;
     }
 
     /* ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ HELPER FUNCTIONS ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ */
@@ -89,7 +90,7 @@ abstract contract ArtTokenCore is IArtTokenCore {
     /// - Over 173 days: The remaining 750 tokens unlock bit by bit
     /// - Each day after day 7, about 4.33 tokens become available (750/173, rounded down)
     /// - At day 180: All 1000 tokens are available (any rounding discrepancy is corrected at the end)
-    function _calculateClaimable(address user, uint256 totalAllocation, bool processClaim) internal returns (uint256) {
+    function _calculateClaimable(address user, uint256 totalAllocation) internal view returns (uint256, bool) {
         // Calculate time passed since vesting started
         uint256 elapsed = block.timestamp - vestingStart;
         uint256 vested = 0;
@@ -144,12 +145,6 @@ abstract contract ArtTokenCore is IArtTokenCore {
         uint256 alreadyClaimed = claimedAmount[user];
         uint256 claimable = 0;
 
-        // Track initial claim status
-        if (!initialClaimed[user] && processClaim) {
-            initialClaimed[user] = true;
-            totalUsersClaimed++;
-        }
-
         // Check if there are any unclaimed vested tokens available
         // vested = total tokens that should be available to the user at this moment
         // alreadyClaimed = total tokens the user has previously withdrawn
@@ -174,6 +169,6 @@ abstract contract ArtTokenCore is IArtTokenCore {
         // 1. User has claimed everything available so far
         // 2. Not enough time has passed for new tokens to vest
 
-        return claimable;
+        return (claimable, initialClaimed[user]);
     }
 }
