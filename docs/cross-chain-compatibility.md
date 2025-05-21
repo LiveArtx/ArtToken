@@ -24,6 +24,10 @@ Reference table for supported networks:
 ### 1. Contract Deployment
 ```bash
 npx hardhat lz:deploy --stage testnet --tags ArtTokenUpgradeable --reset
+
+or
+
+npx hardhat lz:deploy --stage testnet --tags ArtToken --reset
 ```
 
 ### 2. Contract Verification
