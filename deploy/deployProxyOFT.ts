@@ -18,9 +18,9 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
 
-    const name = "ArtToken"
-    const symbol = "ART"
-    const initialSupply = 1000000;
+    const name = "ArtToken Test"
+    const symbol = "ARTT"
+    const initialSupply = 0;
 
     assert(deployer, 'Missing named deployer account')
 
