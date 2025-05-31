@@ -1085,10 +1085,10 @@
     debug "^4.1.1"
     lodash.isequal "^4.5.0"
 
-"@nomicfoundation/hardhat-verify@^2.0.0":
-  version "2.0.13"
-  resolved "https://registry.npmjs.org/@nomicfoundation/hardhat-verify/-/hardhat-verify-2.0.13.tgz#41691adc32e01dc5cf6b725615f64958fba2100b"
-  integrity sha512-i57GX1sC0kYGyRVnbQrjjyBTpWTKgrvKC+jH8CMKV6gHp959Upb8lKaZ58WRHIU0espkulTxLnacYeUDirwJ2g==
+"@nomicfoundation/hardhat-verify@^2.0.14":
+  version "2.0.14"
+  resolved "https://registry.npmjs.org/@nomicfoundation/hardhat-verify/-/hardhat-verify-2.0.14.tgz#ba80918fac840f1165825f2a422a694486f82f6f"
+  integrity sha512-z3iVF1WYZHzcdMMUuureFpSAfcnlfJbJx3faOnGrOYg6PRTki1Ut9JAuRccnFzMHf1AmTEoSUpWcyvBCoxL5Rg==
   dependencies:
     "@ethersproject/abi" "^5.1.2"
     "@ethersproject/address" "^5.0.2"

@@ -11,7 +11,6 @@ The ART Token is an advanced ERC20 token implementation featuring cross-chain co
 
 ```bash
 ├─ contracts/
-│ ├─ ArtToken.sol # Standard non-upgradeable ArtToken contract
 │ └─ ArtTokenUpgradeable.sol # Upgradeable ArtToken contract
 ├─ deploy/ # Deployment scripts
 ├─ test/ # Test files

@@ -70,7 +70,7 @@
     "@layerzerolabs/oapp-evm-upgradeable": "^0.1.1",
     "@layerzerolabs/oft-evm-upgradeable": "^3.0.1",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.14",
     "@nomiclabs/hardhat-etherscan": "^3.1.8"
   }
 }

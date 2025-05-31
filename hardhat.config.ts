@@ -9,10 +9,11 @@ import 'hardhat-deploy'
 import 'hardhat-contract-sizer'
 import '@nomiclabs/hardhat-ethers'
 import '@layerzerolabs/toolbox-hardhat'
-import '@nomiclabs/hardhat-etherscan'
+// import '@nomiclabs/hardhat-etherscan'
 import { HttpNetworkAccountsUserConfig } from 'hardhat/types'
 // import '@openzeppelin/hardhat-upgrades'
 import { EndpointId } from '@layerzerolabs/lz-definitions'
+import "@nomicfoundation/hardhat-verify";
 
 import './tasks/sendMessage';
 import './tasks/upgradeProxy';
@@ -78,6 +79,11 @@ const config  = {
             priorityFee: ethers.utils.parseUnits("3", "gwei"),
             maxFee: ethers.utils.parseUnits("5", "gwei"),
         },
+        'sepolia': {
+            eid: EndpointId.SEPOLIA_V2_TESTNET,
+            url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            accounts,
+        },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,
@@ -93,6 +99,7 @@ const config  = {
             // 'base-testnet': 'process.env.ETHERSCAN_BASE_API_KEY',
             'base-testnet': process.env.BLOCKSCOUT_API_KEY,
             'linea-testnet': process.env.ETHERSCAN_LINEA_API_KEY,
+            'sepolia': process.env.ETHERSCAN_ETH_API_KEY,
         },
         customChains: [
             {
@@ -121,7 +128,14 @@ const config  = {
                     browserURL: 'https://sepolia.lineascan.build/address',
                 },
             },
-
+            // {
+            //     network: 'sepolia',
+            //     chainId: 11155111,
+            //     urls: {
+            //         apiURL: 'https://eth-sepolia.blockscout.com/api',
+            //         browserURL: 'https://eth-sepolia.blockscout.com/',
+            //     },
+            // },
         ],
     },
 }
