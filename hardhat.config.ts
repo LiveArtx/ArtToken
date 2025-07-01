@@ -9,9 +9,7 @@ import 'hardhat-deploy'
 import 'hardhat-contract-sizer'
 import '@nomiclabs/hardhat-ethers'
 import '@layerzerolabs/toolbox-hardhat'
-// import '@nomiclabs/hardhat-etherscan'
 import { HttpNetworkAccountsUserConfig } from 'hardhat/types'
-// import '@openzeppelin/hardhat-upgrades'
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 import "@nomicfoundation/hardhat-verify";
 
@@ -21,6 +19,11 @@ import './tasks/upgradeProxy';
 import { ethers } from 'ethers'
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
+
+// Validate Alchemy API key
+if (!ALCHEMY_API_KEY) {
+    console.warn('ALCHEMY_API_KEY not found in environment variables. Some networks may not work properly.')
+}
 
 // Set your preferred authentication method
 //
@@ -43,7 +46,7 @@ if (accounts == null) {
     )
 }
 
-const config  = {
+const config = {
     paths: {
         cache: 'cache/hardhat',
     },
@@ -84,6 +87,21 @@ const config  = {
             url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
             accounts,
         },
+        'base': {
+            eid: EndpointId.BASE_V2_MAINNET,
+            url: `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            accounts,
+            priorityFee: ethers.utils.parseUnits("3", "gwei"),
+            maxFee: ethers.utils.parseUnits("5", "gwei"),
+        },
+        'bsc': {
+            eid: EndpointId.BSC_V2_MAINNET,
+            url: `https://bsc-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            accounts,
+            gasPrice: 8000000000,
+            priorityFee: ethers.utils.parseUnits("3", "gwei"),
+            maxFee: ethers.utils.parseUnits("5", "gwei"),
+        },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,
@@ -97,21 +115,39 @@ const config  = {
     etherscan: {
         apiKey: {
             // 'base-testnet': 'process.env.ETHERSCAN_BASE_API_KEY',
-            'base-testnet': process.env.BLOCKSCOUT_API_KEY,
-            'linea-testnet': process.env.ETHERSCAN_LINEA_API_KEY,
-            'sepolia': process.env.ETHERSCAN_ETH_API_KEY,
+            // 'base-testnet': process.env.BLOCKSCOUT_API_KEY,
+            // 'linea-testnet': process.env.ETHERSCAN_LINEA_API_KEY,
+            // 'sepolia': process.env.ETHERSCAN_ETH_API_KEY,
+            'base': process.env.ETHERSCAN_API_KEY,
+            'bsc': process.env.ETHERSCAN_API_KEY,
         },
         customChains: [
             {
-                network: 'base-testnet',
-                chainId: 84532,
+                network: "base",
+                chainId: 8453,
                 urls: {
-                    // apiURL: 'https://api-sepolia.basescan.org/api',
-                    apiURL: 'https://base-sepolia.blockscout.com/api',
-                    // browserURL: 'https://basescan.org',
-                    browserURL: 'https://base-sepolia.blockscout.com/',
+                  apiURL: "https://api.basescan.org/api",
+                  browserURL: "https://basescan.org",
                 },
-            },
+              },
+              {
+                network: "bsc",
+                chainId: 56,
+                urls: {
+                  apiURL: "https://api.bscscan.com/api",
+                  browserURL: "https://bscscan.com",
+                },
+              },
+            // {
+            //     network: 'base-testnet',
+            //     chainId: 84532,
+            //     urls: {
+            //         // apiURL: 'https://api-sepolia.basescan.org/api',
+            //         apiURL: 'https://base-sepolia.blockscout.com/api',
+            //         // browserURL: 'https://basescan.org',
+            //         browserURL: 'https://base-sepolia.blockscout.com/',
+            //     },
+            // },
             // {
             //     network: 'linea',
             //     chainId: 59144,
@@ -120,14 +156,14 @@ const config  = {
             //         browserURL: 'https://lineascan.build/',
             //     },
             // },
-            {
-                network: 'linea-testnet',
-                chainId: 59141,
-                urls: {
-                    apiURL: 'https://api-sepolia.lineascan.build/api',
-                    browserURL: 'https://sepolia.lineascan.build/address',
-                },
-            },
+            // {
+            //     network: 'linea-testnet',
+            //     chainId: 59141,
+            //     urls: {
+            //         apiURL: 'https://api-sepolia.lineascan.build/api',
+            //         browserURL: 'https://sepolia.lineascan.build/address',
+            //     },
+            // },
             // {
             //     network: 'sepolia',
             //     chainId: 11155111,

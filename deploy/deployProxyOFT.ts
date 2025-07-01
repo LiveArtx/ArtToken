@@ -18,8 +18,9 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const { deterministic } = deployments
     const { deployer } = await getNamedAccounts()
 
-    const name = "ArtToken Test"
-    const symbol = "ARTT"
+    const name = "ArtToken"
+    const symbol = "ART"
+    // const owner = "0x7D40aC593332049a189Cd5AeF94B049657F14130";
     const initialSupply = 0;
 
     assert(deployer, 'Missing named deployer account')
@@ -27,22 +28,6 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
-    // This is an external deployment pulled in from @layerzerolabs/lz-evm-sdk-v2
-    //
-    // @layerzerolabs/toolbox-hardhat takes care of plugging in the external deployments
-    // from @layerzerolabs packages based on the configuration in your hardhat config
-    //
-    // For this to work correctly, your network config must define an eid property
-    // set to `EndpointId` as defined in @layerzerolabs/lz-definitions
-    //
-    // For example:
-    //
-    // networks: {
-    //   fuji: {
-    //     ...
-    //     eid: EndpointId.AVALANCHE_V2_TESTNET
-    //   }
-    // }
 
     const eid = hre.network.config.eid as EndpointId
     const lzNetworkName = endpointIdToNetwork(eid)

@@ -11,13 +11,13 @@ import { OAppEnforcedOption, OmniPointHardhat } from '@layerzerolabs/toolbox-har
 // uint16 internal constant SEND = 1; // a standard token transfer via send()
 // uint16 internal constant SEND_AND_CALL = 2; // a composed token transfer via send()
 
-const lineaContract: OmniPointHardhat = {
-    eid: EndpointId.LINEASEP_V2_TESTNET,
+const bnbContract: OmniPointHardhat = {
+    eid: EndpointId.BSC_V2_MAINNET,
     contractName: 'ArtTokenUpgradeable',
 }
 
 const baseContract: OmniPointHardhat = {
-    eid: EndpointId.BASESEP_V2_TESTNET,
+    eid: EndpointId.BASE_V2_MAINNET,
     contractName: 'ArtTokenUpgradeable',
 }
 
@@ -46,7 +46,7 @@ const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
 export default async function () {
     const connections = await generateConnectionsConfig([
         [
-            lineaContract, // srcContract
+            bnbContract, // srcContract
             baseContract, // dstContract
             [['LayerZero Labs'], []], // [ requiredDVN[], [ optionalDVN[], threshold ] ]
             [1, 1], // [srcToDstConfirmations, dstToSrcConfirmations]
@@ -55,7 +55,7 @@ export default async function () {
 
         [
             baseContract, // srcContract
-            lineaContract, // dstContract
+            bnbContract, // dstContract
             [['LayerZero Labs'], []], // [ requiredDVN[], [ optionalDVN[], threshold ] ]
             [1, 1], // [srcToDstConfirmations, dstToSrcConfirmations]
             [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // [enforcedOptionsSrcToDst, enforcedOptionsDstToSrc]
@@ -63,7 +63,7 @@ export default async function () {
     ])
 
     return {
-        contracts: [{ contract: lineaContract }, { contract: baseContract }],
+        contracts: [{ contract: bnbContract }, { contract: baseContract }],
         connections,
     }
 }
