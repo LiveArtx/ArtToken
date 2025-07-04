@@ -34,7 +34,7 @@ interface Args {
 //! Set PRIVATE_KEY in .env
 
 // Example Command:
-// npx hardhat proxy:upgrade --proxyaddr 0xEeec2DA1372cC2BE54354acb2a501Bcc4d4EcCA0 --proxyadminaddr 0xB9cDA1bCCEb6137a3c001CDe4Ec24731dFC80fAc--impl ArtTokenOFT2 --network base-testnet
+// npx hardhat proxy:upgrade --proxyaddr 0x4DEC3139f4A6c638E26452d32181fe87A7530805 --proxyadminaddr 0x07095212518aE9EA64760E9F01f49D1618b18aC8 --impl ArtTokenUpgradeableV2 --network base
 
 task('proxy:upgrade', 'upgrade art token proxy')
     .addParam('proxyaddr', 'proxy address', undefined, types.string)
@@ -52,6 +52,7 @@ task('proxy:upgrade', 'upgrade art token proxy')
             if (!network.config.eid) {
                 throw new Error('Network endpoint ID (eid) not configured')
             }
+            console.log("EID", network.config.eid);
 
 
             // create proxy instance
@@ -62,11 +63,14 @@ task('proxy:upgrade', 'upgrade art token proxy')
             // Get the endpoint address
             const eid = network.config.eid as EndpointId
             const lzNetworkName = endpointIdToNetwork(eid)
+            console.log("LZ Network Name", lzNetworkName);
             const { address } = getDeploymentAddressAndAbi(lzNetworkName, 'EndpointV2')
+            console.log("EndpointV2 address", address);
 
             if (!address) {
                 throw new Error(`EndpointV2 address not found for network ${lzNetworkName}`)
             }
+            console.log("EndpointV2 address found");
 
             // deploy the new implementation
             const implDeployment = await deployments.deploy(implName, {
@@ -77,7 +81,7 @@ task('proxy:upgrade', 'upgrade art token proxy')
             }).catch((error) => {
                 throw new Error(`Failed to deploy implementation: ${error.message}`)
             })
-
+            
             console.log(`Implementation deployed to: ${implDeployment.address}`)
 
             // upgrade the proxy

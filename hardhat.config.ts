@@ -96,7 +96,7 @@ const config = {
         },
         'bsc': {
             eid: EndpointId.BSC_V2_MAINNET,
-            url: `https://bsc-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+            url: `https://bnb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
             accounts,
             gasPrice: 8000000000,
             priorityFee: ethers.utils.parseUnits("3", "gwei"),
